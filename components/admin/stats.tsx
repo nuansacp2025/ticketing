@@ -96,65 +96,66 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
                 data: makeData(reservedSeats, totalSeats),
             },
             ].map(({ key, label, data }) => {
-            const percent = data[0].value && data.reduce((sum, d) => sum + d.value, 0)
-                ? Math.round((data[0].value / data.reduce((sum, d) => sum + d.value, 0)) * 100)
-                : 0;
+                const totalValue = data.reduce((sum, d) => sum + d.value, 0);
+                const percent = data[0].value && totalValue
+                    ? Math.round((data[0].value / totalValue) * 100)
+                    : 0;
 
-            return (
-                <div key={key} style={card}>
-                <h3 style={title}>{label}</h3>
-                <div style={{ width: '100%', height: 180, position: 'relative' }}>
-                    <ResponsiveContainer>
-                    <PieChart>
-                        <Pie
-                        data={data}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={4}
-                        labelLine={false}
-                        label={false}
-                        isAnimationActive={false}
+                return (
+                    <div key={key} style={card}>
+                    <h3 style={title}>{label}</h3>
+                    <div style={{ width: '100%', height: 180, position: 'relative' }}>
+                        <ResponsiveContainer>
+                        <PieChart>
+                            <Pie
+                            data={data}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={70}
+                            paddingAngle={4}
+                            labelLine={false}
+                            label={false}
+                            isAnimationActive={false}
+                            >
+                            {data.map((_, i) => (
+                                <Cell key={
+                                `cell-${i}`
+                                } fill={COLORS[i % COLORS.length]} />
+                            ))}
+                            </Pie>
+                            <Tooltip
+                            formatter={(v: number) => v}
+                            contentStyle={{ backgroundColor: '#003218', borderRadius: 4 }}
+                            itemStyle={{ color: '#fff' }}
+                            />
+                            <Legend
+                            verticalAlign="bottom"
+                            align="center"
+                            iconType="circle"
+                            wrapperStyle={{ fontSize: '0.75rem', color: '#ccc' }}
+                            />
+                        </PieChart>
+                        </ResponsiveContainer>
+                        {/* Centered Label */}
+                        <div
+                        style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            color: '#fff',
+                            fontSize: '1.5rem',
+                            fontWeight: 700,
+                        }}
                         >
-                        {data.map((_, i) => (
-                            <Cell key={
-                            `cell-${i}`
-                            } fill={COLORS[i % COLORS.length]} />
-                        ))}
-                        </Pie>
-                        <Tooltip
-                        formatter={(v: number) => v}
-                        contentStyle={{ backgroundColor: '#003218', borderRadius: 4 }}
-                        itemStyle={{ color: '#fff' }}
-                        />
-                        <Legend
-                        verticalAlign="bottom"
-                        align="center"
-                        iconType="circle"
-                        wrapperStyle={{ fontSize: '0.75rem', color: '#ccc' }}
-                        />
-                    </PieChart>
-                    </ResponsiveContainer>
-                    {/* Centered Label */}
-                    <div
-                    style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: '#fff',
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                    }}
-                    >
-                    {percent}%
+                        {percent}%
+                        </div>
                     </div>
-                </div>
-                </div>
-            );
+                    </div>
+                );
             })}
         </div>
         </div>

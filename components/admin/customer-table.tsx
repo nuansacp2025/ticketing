@@ -5,13 +5,14 @@ import {
   AllCommunityModule,
   GridOptions,
   ColDef,
+  GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }) => {
-  const gridOnReady = (e: any) => e.api.sizeColumnsToFit();
+  const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
 
   const defaultColDef: GridOptions['defaultColDef'] = {
     flex: 1,

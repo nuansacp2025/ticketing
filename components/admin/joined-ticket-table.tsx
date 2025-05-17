@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { AgGridReact }      from 'ag-grid-react';
 import { ModuleRegistry,
          AllCommunityModule,
-         ColDef }           from 'ag-grid-community';
+         ColDef, 
+         GridReadyEvent}           from 'ag-grid-community';
 import { darkGreenTheme }    from '@/app/ag-grid-theme';
 
 ModuleRegistry.registerModules([ AllCommunityModule ]);
@@ -12,7 +13,7 @@ export const JoinedTicketTable: React.FC<{
   tickets:   Ticket[];
   seats:     Seat[];
 }> = ({ customers, tickets, seats }) => {
-    const gridOnReady = (e: any) => e.api.sizeColumnsToFit();
+    const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
     // Join tickets, customer, seat
     const rowData = useMemo(() => tickets.map(t => {
         const owner = customers.find(c => c.ticketIds.includes(t.id));

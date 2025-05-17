@@ -4,6 +4,7 @@ import {
   ModuleRegistry,
   AllCommunityModule,
   ColDef,
+  GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
 
@@ -14,7 +15,7 @@ export const JoinedSeatTable: React.FC<{
   tickets: Ticket[];
   seats: Seat[];
 }> = ({ customers, tickets, seats }) => {
-    const gridOnReady = (e: any) => e.api.sizeColumnsToFit();
+    const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
     const rowData = useMemo(() =>
         seats.map(s => {
             const ticket = tickets.find(t => t.id === s.reservedBy);
