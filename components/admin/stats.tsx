@@ -18,9 +18,10 @@ interface StatsProps {
 const COLORS = ['#66BB6A', '#EEEEEE'];
 
 export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
+    const ticketMap = new Map<string, Ticket>(tickets.map(t => [t.id, t]));
     const totalCustomers = customers.length;
     const confirmedCustomers = customers.filter(c =>
-        c.ticketIds.every(id => tickets.find(t => t.id === id)?.seatConfirmed)
+        c.ticketIds.every(id => ticketMap.get(id)?.seatConfirmed)
     ).length;
 
     const totalTickets = tickets.length;
