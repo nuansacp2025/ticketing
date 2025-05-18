@@ -41,6 +41,23 @@ export async function getCustomer(id: string): Promise<Customer | null> {
     return customer;
 }
 
+export async function getCustomers(): Promise<Customer[]> {
+    const snap = await getDocs(collection(db, "customers"));
+    if (snap.empty) return [];
+    const customers: Customer[] = [];
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        console.log("HAHA", data);
+        customers.push({
+            id: data.id,
+            email: data.email,
+            ticketIds: data.ticketIds ?? null
+        });
+    });
+
+    return customers;
+}
+
 export async function getCustomerByEmail(email: string) : Promise<Customer | null> {
     const customersRef = collection(db, 'customers');
     const q = query(customersRef, where('email', '==', email));
@@ -59,6 +76,24 @@ export async function getTicket(id: string): Promise<Ticket | null> {
     const ref = doc(db, "tickets", id);
     const snap = await getDoc(ref);
     return snap.exists() ? { id: snap.id, ...snap.data() } as Ticket : null;
+}
+
+export async function getTickets(): Promise<Ticket[]> {
+    const snap = await getDocs(collection(db, "tickets"));
+    if (snap.empty) return [];
+    const tickets: Ticket[] = [];
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        console.log("HAHA", data);
+        tickets.push({
+            id: data.id,
+            code: data.code,
+            category: data.category,
+            seatConfirmed: data.seatConfirmed,
+            });
+    });
+
+    return tickets;
 }
   
 export async function getTicketByCode(code: string) {

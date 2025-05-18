@@ -1,9 +1,20 @@
-import admin from "firebase-admin";
+import { initializeApp, cert, getApps, App } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(), // or use serviceAccount
+const serviceAccount = {
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+  privateKey: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+};
+
+let adminApp: App;
+
+if (!getApps().length) {
+  adminApp = initializeApp({
+    credential: cert(serviceAccount),
   });
+} else {
+  adminApp = getApps()[0];
 }
 
-export const adminAuth = admin.auth();
+export { adminApp, getAuth };

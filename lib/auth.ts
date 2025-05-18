@@ -2,7 +2,7 @@ import { getCustomerByEmail, getTicketByCode } from './db';
 import jwt from 'jsonwebtoken';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/db/source";
-import { adminAuth } from "@/db/admin";
+import { adminApp, getAuth } from "@/db/admin";
 
 const SECRET_KEY = "your-secret-key"; // Replace with a secure key
 
@@ -25,7 +25,7 @@ export async function loginAdmin(email: string, password: string) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const token = await user.getIdToken(true);
-      return { status: true, token: token, message: "Login Success" };
+      return { status: true, token: token, uid: user.uid, message: "Login Success" };
     } catch (error: any) {
         return { status: false, token: "", message: error.message};
     }
@@ -41,11 +41,6 @@ export function verify(token: string): { ticketId: string } {
 
 
 export async function verifyAdmin(token: string) {
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        return decodedToken;
-    } catch (error) {
-        throw new Error("Invalid or expired token");
-    }
+  const decodedToken = await getAuth(adminApp).verifyIdToken(token);
+  return decodedToken;
 }
-

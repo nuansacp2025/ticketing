@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import admin from "firebase-admin";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
