@@ -2,6 +2,7 @@ import { getCustomerByEmail, getTicketByCode } from './db';
 import jwt from 'jsonwebtoken';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/db/source";
+import { adminAuth } from "@/db/admin";
 
 const SECRET_KEY = "your-secret-key"; // Replace with a secure key
 
@@ -37,3 +38,14 @@ export function verify(token: string): { ticketId: string } {
         throw new Error("Invalid token");
     }
 }
+
+
+export async function verifyAdmin(token: string) {
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        return decodedToken;
+    } catch (error) {
+        throw new Error("Invalid or expired token");
+    }
+}
+

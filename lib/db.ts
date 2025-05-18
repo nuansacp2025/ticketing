@@ -75,6 +75,22 @@ export async function getTicketByCode(code: string) {
     };
     return ticket;
 }
+
+export async function getCustomerByTicketId(ticketId: string): Promise<Customer | null> {
+    const customersRef = collection(db, 'customers');
+    const q = query(customersRef, where('ticketIds', 'array-contains', ticketId));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    const customer: Customer = {
+        id: doc.id,
+        email: doc.data().email,
+        ticketIds: doc.data().ticketIds
+    };
+    return customer;
+}
+
   
 export async function getSeats(): Promise<Seat[]> {
     const snap = await getDocs(collection(db, "seats"));
