@@ -1,4 +1,4 @@
-import { getCustomerByTicketId, getSeats, getTicket } from "./db";
+import { getCustomerByTicketId, getSeats, getTicket, setTicketCheckedIn } from "./db";
 
 export interface Profile {
     email: string,
@@ -24,4 +24,15 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
         seatConfirmed: ticket.seatConfirmed,
         seatIds: mySeats,
     };
+}
+
+export async function updateCheckedInStatus(ticketId: string) {
+    const ticket = await getTicket(ticketId);
+    if (ticket == null) {
+        throw new Error("Ticket not found");
+    }
+    if (ticket?.checkedIn) {
+        throw new Error("Ticket already Checked In");
+    }
+    await setTicketCheckedIn(ticketId);
 }

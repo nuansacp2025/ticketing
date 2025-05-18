@@ -5,7 +5,8 @@ import {
     query,
     where,
     doc,
-    getDoc
+    getDoc,
+    updateDoc
 } from 'firebase/firestore';
   
 
@@ -20,6 +21,7 @@ export interface Ticket {
     code: string,
     category: string,
     seatConfirmed: boolean,
+    checkedIn: boolean
 }
 
 export interface Seat {
@@ -90,11 +92,18 @@ export async function getTickets(): Promise<Ticket[]> {
             code: data.code,
             category: data.category,
             seatConfirmed: data.seatConfirmed,
-            });
+            checkedIn: data.checkedIn
+        });
     });
 
     return tickets;
 }
+
+export async function setTicketCheckedIn(ticketId: string): Promise<void> {
+    const ticketRef = doc(db, "tickets", ticketId);
+    await updateDoc(ticketRef, { checkedIn: true });
+}
+
   
 export async function getTicketByCode(code: string) {
     const ticketsRef = collection(db, 'tickets');
@@ -107,6 +116,7 @@ export async function getTicketByCode(code: string) {
         code: doc.data().code,
         category: doc.data().category,
         seatConfirmed: doc.data().seatConfirmed,
+        checkedIn: doc.data().checkedIn
     };
     return ticket;
 }
