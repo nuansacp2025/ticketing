@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     }
     const { status, token } = await login(email, ticketCode);
     if (status) {
-        const response = NextResponse.redirect(new URL("/ticket", BASE_URL));
+        const response = NextResponse.json({ success: true });
         response.cookies.set("token", token, { httpOnly: true, secure: true, sameSite: "strict" });
         return response;
     } else {

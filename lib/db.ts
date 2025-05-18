@@ -36,7 +36,7 @@ export async function getCustomer(id: string): Promise<Customer | null> {
     if (!docSnap.exists()) return null;
 
     const customer: Customer = {
-        id: docSnap.data().id,
+        id: docSnap.id,
         email: docSnap.data().email,
         ticketIds: docSnap.data().ticketIds
     };
@@ -49,7 +49,6 @@ export async function getCustomers(): Promise<Customer[]> {
     const customers: Customer[] = [];
     snap.forEach(docSnap => {
         const data = docSnap.data();
-        console.log("HAHA", data);
         customers.push({
             id: data.id,
             email: data.email,
@@ -67,7 +66,7 @@ export async function getCustomerByEmail(email: string) : Promise<Customer | nul
     if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
     const customer: Customer = {
-        id: doc.data().id,
+        id: doc.id,
         email: doc.data().email,
         ticketIds: doc.data().ticketIds
     };
@@ -86,7 +85,6 @@ export async function getTickets(): Promise<Ticket[]> {
     const tickets: Ticket[] = [];
     snap.forEach(docSnap => {
         const data = docSnap.data();
-        console.log("HAHA", data);
         tickets.push({
             id: data.id,
             code: data.code,
@@ -112,7 +110,7 @@ export async function getTicketByCode(code: string) {
     if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
     const ticket: Ticket = {
-        id: doc.data().id,
+        id: doc.id,
         code: doc.data().code,
         category: doc.data().category,
         seatConfirmed: doc.data().seatConfirmed,

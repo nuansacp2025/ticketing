@@ -1,5 +1,4 @@
 import { verify } from "@/lib/auth";
-import { BASE_URL } from "@/lib/constants";
 import { getMyProfile } from "@/lib/protected";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,9 +9,10 @@ export async function GET(request: NextRequest) {
             throw new Error("Not logged in");
         }
         const { ticketId } = verify(token!.value);
-        const profile = getMyProfile(ticketId)!;
+        const profile = await getMyProfile(ticketId)!;
+        console.log("PROFILE", profile);
         return NextResponse.json(profile, { status: 200 });
-    } catch (error) {
-        return NextResponse.redirect(new URL("/", BASE_URL));
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
     }
 }
