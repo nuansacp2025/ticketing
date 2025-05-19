@@ -3,11 +3,10 @@ import jwt from 'jsonwebtoken';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/db/source";
 import { adminApp, getAuth } from "@/db/admin";
-
-const SECRET_KEY = "your-secret-key"; // Replace with a secure key
+import { SECRET_KEY } from './constants';
 
 function makeJWT(ticketId: string): string {
-    return jwt.sign({ ticketId }, SECRET_KEY, { expiresIn: '1h' });
+    return jwt.sign({ ticketId }, SECRET_KEY, { expiresIn: '7d' });
 }
 
 export async function login(email: string, ticketCode: string): Promise<{ status: boolean, token: string }> {

@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Fields `email` and `password` required" }, { status: 400 });
     }
     const { status, token, uid, message } = await loginAdmin(email, password);
-    console.log("HAHA");
     if (status) {
       await getAuth(adminApp).setCustomUserClaims(uid ?? "", { admin: true });
 
@@ -17,8 +16,7 @@ export async function POST(request: NextRequest) {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production", // use true in prod
           sameSite: "strict",
-          path: "/",
-          maxAge: 60 * 60,
+          maxAge: 60 * 60 * 24 * 7,
       });  
 
       return response;

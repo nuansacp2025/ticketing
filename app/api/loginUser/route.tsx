@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { status, token } = await login(email, ticketCode);
     if (status) {
         const response = NextResponse.json({ success: true });
-        response.cookies.set("token", token, { httpOnly: true, secure: true, sameSite: "strict" });
+        response.cookies.set("token", token, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 60 * 60 * 24 * 7 });
         return response;
     } else {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
