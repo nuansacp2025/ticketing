@@ -173,14 +173,14 @@ export async function setSeatsReserved(ids: string[], ticketIds: string[]) {
       const seatDoc = await getDoc(seatRef);
       const ticketRef = doc(db, "tickets", ticketIds[i]);
       const ticketDoc = await getDoc(ticketRef);
-      if (!ticketDoc.exists) {
+      if (!ticketDoc.exists()) {
         throw new Error("Ticket(s) are not exist");
       }
       // Assumption: ticket can only confirm seat at most once
-      if (ticketDoc.seatConfirmed) {
+      if (ticketDoc.data().seatConfirmed) {
         throw new Error("Ticket(s) have confirmed seat(s)")
       }
-      if (!seatDoc.exists || seatDoc.isAvaliable == false) {
+      if (!seatDoc.exists() || seatDoc.data().isAvaliable == false) {
         throw new Error("Seat(s) are not available");
       }
     }
