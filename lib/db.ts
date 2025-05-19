@@ -6,7 +6,8 @@ import {
     where,
     doc,
     getDoc,
-    updateDoc
+    updateDoc,
+    runTransaction
 } from 'firebase/firestore';
   
 
@@ -143,7 +144,7 @@ export async function getSeats(): Promise<Seat[]> {
     snap.forEach(docSnap => {
         const data = docSnap.data();
         seats.push({
-            id: data.id,
+            id: docSnap.id,
             isAvailable: data.isAvailable,
             reservedBy: data.reservedBy ?? null
         });
@@ -152,4 +153,42 @@ export async function getSeats(): Promise<Seat[]> {
     return seats;
 }
   
-  
+export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
+  const snap = await getDocs(collection(db, "seats"));
+  let seatsAvailability = new Map<String, boolean>();
+  if (snap.empty) return seatsAvailability;
+
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    seatsAvailability.set(docSnap.id, data.isAvailable);
+  });
+  console.log(seatsAvailability);
+  return seatsAvailability;
+}
+
+export async function setSeatsReserved(ids: string[], ticketIds: string[]) {
+  await runTransaction(db, async (transaction) => {
+    for (let i = 0; i < ids.length; i++) {
+      const seatRef = doc(db, "seats", ids[i]);
+      const seatDoc = await getDoc(seatRef);
+      const ticketRef = doc(db, "tickets", ticketIds[i]);
+      const ticketDoc = await getDoc(ticketRef);
+      if (!ticketDoc.exists()) {
+        throw new Error("Ticket(s) are not exist");
+      }
+      // Assumption: ticket can only confirm seat at most once
+      if (ticketDoc.data().seatConfirmed) {
+        throw new Error("Ticket(s) have confirmed seat(s)")
+      }
+      if (!seatDoc.exists() || seatDoc.data().isAvaliable == false) {
+        throw new Error("Seat(s) are not available");
+      }
+    }
+    for (let i = 0; i < ids.length; i++) {
+      const seatRef = doc(db, "seats", ids[i]);
+      const ticketRef = doc(db, "tickets", ticketIds[i]);
+      await updateDoc(seatRef, { isAvailable: false, reservedBy: ticketIds[i] });
+      await updateDoc(ticketRef, { seatConfirmed: true });
+    }
+  });
+}
