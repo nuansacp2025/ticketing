@@ -28,7 +28,7 @@ export interface Ticket {
 export interface Seat {
     id: string,
     isAvailable: boolean,
-    reservedBy: string,
+    reservedBy: string | null,
 }
 
 export async function getCustomer(id: string): Promise<Customer | null> {
@@ -53,7 +53,7 @@ export async function getCustomers(): Promise<Customer[]> {
         customers.push({
             id: data.id,
             email: data.email,
-            ticketIds: data.ticketIds ?? null
+            ticketIds: data.ticketIds
         });
     });
 
@@ -180,7 +180,7 @@ export async function setSeatsReserved(ids: string[], ticketIds: string[]) {
       if (ticketDoc.data().seatConfirmed) {
         throw new Error("Ticket(s) have confirmed seat(s)")
       }
-      if (!seatDoc.exists() || seatDoc.data().isAvaliable == false) {
+      if (!seatDoc.exists() || seatDoc.data().isAvailable == false) {
         throw new Error("Seat(s) are not available");
       }
     }
