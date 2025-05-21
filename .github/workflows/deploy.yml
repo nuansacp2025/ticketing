@@ -1,0 +1,60 @@
+name: Deploy to Vercel
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      preview:
+        required: false
+        type: boolean
+        default: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+            node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm test
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: test
+    environment: ${{ inputs.environment }}
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+        - name: Set up environment variables
+          run: | 
+            echo "VERCEL_ORG_ID=${{ secrets.VERCEL_ORG_ID }}" >> $GITHUB_ENV 
+            echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_PROJECT_ID }}" >> $GITHUB_ENV
+            if [ ${{ inputs.preview }} = true ]; then
+              echo "VERCEL_ENVIRONMENT=preview" >> $GITHUB_ENV
+              echo "VERCEL_DEPLOYMENT_FLAG=" >> $GITHUB_ENV
+            else
+              echo "VERCEL_ENVIRONMENT=production" >> $GITHUB_ENV
+              echo "VERCEL_DEPLOYMENT_FLAG=--prod" >> $GITHUB_ENV
+            fi
+        - name: Set up Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '20'
+        - name: Install dependencies
+          run: npm install
+        - name: Install Vercel CLI
+          run: npm install -g vercel
+        - name: Pull Vercel Environment Information
+          run: vercel pull --yes --environment=$VERCEL_ENVIRONMENT --token=${{ secrets.VERCEL_TOKEN }}
+        - name: Deploy to Vercel Preview
+          run: vercel $VERCEL_DEPLOYMENT_FLAG --token=${{ secrets.VERCEL_TOKEN }}

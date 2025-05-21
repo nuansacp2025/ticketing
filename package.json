@@ -6,9 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
+    "firebase": "^11.7.3",
+    "firebase-admin": "^13.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "next": "15.3.2",
     "ag-grid-community": "^33.3.0",
     "ag-grid-react": "^33.3.0",
     "chart.js": "^4.4.9",
@@ -20,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
