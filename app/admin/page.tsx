@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import {
   Chart as ChartJS,
@@ -36,38 +36,75 @@ export default function AdminPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
 
-  // Fetch data only when logged in
+  // Check if user is logged in
   useEffect(() => {
-    // Check if logged in
     fetch('/api/loginAdmin')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
         setIsLoggedIn(data.loggedIn);
       })
       .catch(err => console.error('Error checking login status:', err));
+  }, []);
+
+  // Fetch data only when logged in
+  useEffect(() => {
     if (!isLoggedIn) return;
-    fetch('/mock_data.json')
+    // fetch('/mock_data.json')
+    //   .then(res => {
+    //     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    //     return res.json();
+    //   })
+    //   .then((data: {
+    //     customers: Record<string, Omit<Customer, 'id'>>;
+    //     tickets: Record<string, Omit<Ticket, 'id'>>;
+    //     seats: Record<string, Omit<Seat, 'id'>>;
+    //   }) => {
+    //     const customersArray = Object.entries(data.customers).map(([id, value]) => ({ id, ...value }));
+    //     const ticketsArray   = Object.entries(data.tickets).map(([id, value]) => ({ id, ...value }));
+    //     const seatsArray     = Object.entries(data.seats).map(([id, value]) => ({ id, ...value }));
+    //     setCustomers(customersArray);
+    //     setTickets(ticketsArray);
+    //     setSeats(seatsArray);
+    //   })
+    //   .catch(err => console.error('Error fetching data:', err));
+    // Fetch data
+    fetch('/api/getAllCustomers')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
-      .then((data: {
-        customers: Record<string, Omit<Customer, 'id'>>;
-        tickets: Record<string, Omit<Ticket, 'id'>>;
-        seats: Record<string, Omit<Seat, 'id'>>;
-      }) => {
-        const customersArray = Object.entries(data.customers).map(([id, value]) => ({ id, ...value }));
-        const ticketsArray   = Object.entries(data.tickets).map(([id, value]) => ({ id, ...value }));
-        const seatsArray     = Object.entries(data.seats).map(([id, value]) => ({ id, ...value }));
+      .then((data: Record<string, Omit<Customer, 'id'>>) => {
+        const customersArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
         setCustomers(customersArray);
+      })
+      .catch(err => console.error('Error fetching customers:', err));
+    fetch('/api/getAllTickets')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then((data: Record<string, Omit<Ticket, 'id'>>) => {
+        console.log(data);
+        const ticketsArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
         setTickets(ticketsArray);
+      })
+      .catch(err => console.error('Error fetching tickets:', err));
+    fetch('/api/getAllSeats')
+      .then(res => {
+        return res.json();
+      })
+      .then((data: Record<string, Omit<Seat, 'id'>>) => {
+        const seatsArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
         setSeats(seatsArray);
       })
-      .catch(err => console.error('Error fetching data:', err));
+      .catch(err => console.error('Error fetching seats:', err));
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    console.log("Customer: ", customers);
+    console.log("Ticket: ", tickets);
+    console.log("Seat: ", seats);
+  }, [customers, tickets, seats]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

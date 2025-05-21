@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { loginAdmin } from "@/lib/auth";
 import { adminApp, getAuth } from "@/db/admin";
+import { verifyAdmin } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
@@ -28,12 +29,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     const token = request.cookies.get("token")?.value;
     if (!token) {
-      return NextResponse.json({ loggedIn: false }, { status: 401 });
+        return NextResponse.json({ loggedIn: false }, { status: 401 });
     }
-  
     try {
-      const decoded = await getAuth().verifyIdToken(token);
-      return NextResponse.json({ loggedIn: true, uid: decoded.uid });
+        const decoded = await verifyAdmin(token);
+        if (!decoded.admin) throw new Error("Not an admin");
+        return NextResponse.json({ loggedIn: true, uid: decoded.uid });
     } catch (e) {
       return NextResponse.json({ loggedIn: false }, { status: 401 });
     }
