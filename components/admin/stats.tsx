@@ -119,7 +119,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
                             paddingAngle={4}
                             labelLine={false}
                             label={false}
-                            isAnimationActive={false}
+                            isAnimationActive={true}
                             >
                             {data.map((_, i) => (
                                 <Cell key={

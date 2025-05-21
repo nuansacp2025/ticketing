@@ -24,3 +24,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: message }, { status: 400 });
     }
 }
+
+export async function GET(request: NextRequest) {
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json({ loggedIn: false }, { status: 401 });
+    }
+  
+    try {
+      const decoded = await getAuth().verifyIdToken(token);
+      return NextResponse.json({ loggedIn: true, uid: decoded.uid });
+    } catch (e) {
+      return NextResponse.json({ loggedIn: false }, { status: 401 });
+    }
+  }

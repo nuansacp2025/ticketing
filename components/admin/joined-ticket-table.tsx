@@ -11,13 +11,11 @@ ModuleRegistry.registerModules([ AllCommunityModule ]);
 export const JoinedTicketTable: React.FC<{
   customers: Customer[];
   tickets:   Ticket[];
-  seats:     Seat[];
-}> = ({ customers, tickets, seats }) => {
+}> = ({ customers, tickets }) => {
     const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
     // Join tickets, customer, seat
     const rowData = useMemo(() => tickets.map(t => {
         const owner = customers.find(c => c.ticketIds.includes(t.id));
-        const seat  = seats.find(s => s.reservedBy === t.id);
         
         return {
             ticketId:      t.id,
@@ -26,10 +24,8 @@ export const JoinedTicketTable: React.FC<{
             seatConfirmed: t.seatConfirmed,
             checkedIn:     t.checkedIn,
             customerId:    owner?.id       ?? '',
-            seatId:        seat?.id        ?? '',
-            seatAvailable: seat?.isAvailable ?? null,
         };
-    }), [tickets, customers, seats]);
+    }), [tickets, customers]);
 
     // Define the grid column
     const columnDefs: ColDef[] = [
