@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import {
   TransformWrapper,
@@ -27,22 +29,24 @@ export function CustomerSeatingPlanInterface() {
   }
 
   return (
-    <SeatingPlanContext.Provider value={contextValue}>
-      <TransformWrapper>
-        <TransformComponent>
-          <SeatingPlan />
-        </TransformComponent>
-        <div>
-          <MiniMap>
-            <Image src="" alt="" onClick={() => setMapPopupVisibility(true)} />
-          </MiniMap>
-          <div>
-            {contextValue.manager.selection.map(id => (
-              <SelectionChip id={id} />
-            ))}
+    <div className="w-[1100px] h-[600px] flex">
+      <SeatingPlanContext.Provider value={contextValue}>
+        <TransformWrapper>
+          <TransformComponent>
+            <SeatingPlan />
+          </TransformComponent>
+          <div className="flex-1 flex flex-col">
+            <MiniMap width={300}>
+              <Image fill  src="/captain_america.png" alt="Click to enlarge map" onClick={() => setMapPopupVisibility(true)} />
+            </MiniMap>
+            <div className="flex-1 flex flex-col">
+              {contextValue.manager.selection.map(id => (
+                <SelectionChip key={id} id={id} />
+              ))}
+            </div>
           </div>
-        </div>
-      </TransformWrapper>
-    </SeatingPlanContext.Provider>
+        </TransformWrapper>
+      </SeatingPlanContext.Provider>
+    </div>
   );
 }
