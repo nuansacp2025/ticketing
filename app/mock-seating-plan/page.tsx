@@ -6,7 +6,7 @@ import { SeatingPlan, SeatingPlanContext } from "@/components/seating-plan/seati
 
 export default function Page() {
   return (
-    <div className="w-full h-full flex justify-center items-center">
+    <div className="w-screen h-screen flex justify-center items-center bg-zinc-800">
       <CustomerSeatingPlanInterface />
     </div>
   );

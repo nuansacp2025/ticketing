@@ -5,13 +5,14 @@ export interface SeatingPlanContextType {
   width: number,
   height: number,
   stageLocation: {
-    x: { start: number, end: number },
-    y: { start: number, end: number },
-  }
+    x: { start: number, length: number },
+    y: { start: number, length: number },
+  },
 
   manager: BaseSeatingPlanManager<any>,
   seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
   seatContentBuilder: (id: string) => ReactNode,
+  StageContent: React.FunctionComponent,
 }
 
 export const SeatingPlanContext = React.createContext<SeatingPlanContextType | null>(null);
@@ -79,7 +80,17 @@ export function SeatingPlan() {
   }
   
   return (
-    <div style={{ width: "800px", height: "600px" }}>
+    <div style={{ width: context.width, height: context.height }}>
+      <div
+        style={{
+          width: context.stageLocation.x.length, height: context.stageLocation.y.length,
+          position: "absolute",
+          top: context.stageLocation.y.start,
+          left: context.stageLocation.x.start,
+        }}
+      >
+        <context.StageContent />
+      </div>
       {Array.from(context.manager.seatMap.keys()).map(id => context.seatContentBuilder(id))}
     </div>
   );

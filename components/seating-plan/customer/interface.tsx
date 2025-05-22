@@ -31,8 +31,8 @@ export function CustomerSeatingPlanInterface() {
   return (
     <div className="w-[1100px] h-[600px] flex">
       <SeatingPlanContext.Provider value={contextValue}>
-        <TransformWrapper>
-          <TransformComponent>
+        <TransformWrapper initialScale={0.8} initialPositionX={-200 /* idk why this is 200 not 250*/} initialPositionY={0} minScale={0.5} maxScale={1.5}>
+          <TransformComponent wrapperStyle={{ maxWidth: "800px", maxHeight: "600px" }}>
             <SeatingPlan />
           </TransformComponent>
           <div className="flex-1 flex flex-col">

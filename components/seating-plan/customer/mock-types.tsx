@@ -5,7 +5,7 @@ import { CustomerSeatingPlanManager } from "./types";
 
 const NotSelectableSeat = (props: { children: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-gray-200 outline-black relative">
+    <div className="w-full h-full bg-gray-500 outline-black outline-2 relative">
       {props.children}
       <span
         className="pointer-events-none absolute left-0 top-0 w-full h-full"
@@ -22,7 +22,7 @@ const NotSelectableSeat = (props: { children: ReactNode }) => {
 
 const TakenSeat = (props: { children: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-red-900 outline-black">
+    <div className="w-full h-full bg-red-900 outline-black outline-2">
       {props.children}
     </div>
   );
@@ -30,7 +30,7 @@ const TakenSeat = (props: { children: ReactNode }) => {
 
 const SelectedSeat = (props: { children: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-blue-500 outline-black">
+    <div className="w-full h-full bg-blue-500 outline-black outline-2">
       {props.children}
     </div>
   );
@@ -38,7 +38,7 @@ const SelectedSeat = (props: { children: ReactNode }) => {
 
 const DefaultSeat = (props: { children: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-gray-200 outline-black">
+    <div className="w-full h-full bg-gray-200 outline-black outline-2">
       {props.children}
     </div>
   );
@@ -47,8 +47,8 @@ const DefaultSeat = (props: { children: ReactNode }) => {
 const mockSeatType: SeatType = {
   label: "Regular Seat",
   style: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 40,
   },
   themes: {
     notSelectable: NotSelectableSeat,
@@ -58,7 +58,13 @@ const mockSeatType: SeatType = {
   },
 }
 
-console.log();
+const MockStageContent = () => {
+  return (
+    <div className="w-full h-full flex justify-center items-center bg-gray-500 outline-black outline-4">
+      <p className="text-3xl"><b>STAGE</b></p>
+    </div>
+  );
+};
 
 const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).map(row => {
   return [
@@ -113,11 +119,12 @@ export const mockSeatingPlanContextValue: SeatingPlanContextType = {
   width: 1500,
   height: 2000,
   stageLocation: {
-    x: { start: 350, end: 1150 },
-    y: { start: 50, end: 300 },
+    x: { start: 350, length: 800 },
+    y: { start: 50, length: 150 },
   },
 
   manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap),
   seatSelectionResultsHandler: results => {},
   seatContentBuilder: id => (<SeatComponent key={id} id={id} />),
+  StageContent: MockStageContent,
 };
