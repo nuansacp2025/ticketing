@@ -25,7 +25,7 @@ export default function SelectionChip({ id }: SelectionChipProps) {
 
   return (
     <div className="flex justify-between items-center">
-      <p>{id}</p>
+      <p className="text-white">{id}</p>
       <div className="flex items-center">
         <div onClick={handleZoomIntoSeat}></div>
         <div onClick={handleUnselectSeat}></div>
