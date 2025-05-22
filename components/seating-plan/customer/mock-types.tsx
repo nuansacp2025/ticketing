@@ -115,16 +115,18 @@ const mockSeatStateMap = new Map<string, BaseSeatState>(Array.from(mockSeatMap.k
 
 console.log(Array.from(mockSeatStateMap));
 
-export const mockSeatingPlanContextValue: SeatingPlanContextType = {
-  width: 1500,
-  height: 2000,
-  stageLocation: {
-    x: { start: 350, length: 800 },
-    y: { start: 50, length: 150 },
-  },
+export function getMockSeatingPlanContextValue(setRerender: React.Dispatch<React.SetStateAction<number>>) {
+  return {
+    width: 1500,
+    height: 2000,
+    stageLocation: {
+      x: { start: 350, length: 800 },
+      y: { start: 50, length: 150 },
+    },
 
-  manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap),
-  seatSelectionResultsHandler: results => {},
-  seatContentBuilder: id => (<SeatComponent key={id} id={id} />),
-  StageContent: MockStageContent,
-};
+    manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap, () => {setRerender(r => r+1)}),
+    seatSelectionResultsHandler: results => {},
+    seatContentBuilder: id => (<SeatComponent key={id} id={id} />),
+    StageContent: MockStageContent,
+  } as SeatingPlanContextType;
+}

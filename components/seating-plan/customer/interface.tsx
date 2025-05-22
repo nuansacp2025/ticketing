@@ -9,18 +9,25 @@ import {
 import Image from "next/image";
 import { SeatingPlan, SeatingPlanContext, SeatingPlanContextType } from "../seating-plan";
 import SelectionChip from "./selection-chip";
-import { mockSeatingPlanContextValue } from "./mock-types";
+import { getMockSeatingPlanContextValue } from "./mock-types";
 
 export function CustomerSeatingPlanInterface() {
   const [contextValue, setContextValue] = React.useState<SeatingPlanContextType | null>(null);
 
   const [mapPopupVisibility, setMapPopupVisibility] = React.useState(false);
 
+  const [rerender, setRerender] = React.useState(0);  // force to re-render by changing this value whenever manager.selection changes
+
+  const context = React.useRef<SeatingPlanContextType>(null);
+  if (context.current === null) {
+    context.current = getMockSeatingPlanContextValue(setRerender);
+  }
+
   React.useEffect(() => {
     // Retrieve data from API
     // Check cookies to retrieve selection from last session
-    setContextValue(mockSeatingPlanContextValue);
-  }, []);
+    setContextValue(context.current);  // updates context value so everything re-renders
+  }, [rerender]);
 
   if (contextValue === null) {
     return (

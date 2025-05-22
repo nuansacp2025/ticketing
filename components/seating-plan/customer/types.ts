@@ -33,6 +33,7 @@ export class CustomerSeatingPlanManager extends BaseSeatingPlanManager<BaseSeatS
         }
         state.taken = taken;
       })
+      this._updateContext();
     })
   }
 }

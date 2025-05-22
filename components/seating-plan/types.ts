@@ -44,10 +44,12 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
 
   _seatIds: Set<string>
   _seatStateMapMutex: Mutex
+  _updateContext: () => void
 
   constructor(
     seatMap: ReadonlyMap<string, SeatMetadata>,
     initialSeatStateMap: ReadonlyMap<string, T>,
+    updateContextCallback?: () => void,
   ) {
     this.seatMap = new Map(seatMap);
     this.seatStateMap = new Map(initialSeatStateMap);
@@ -63,6 +65,8 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
     });
     
     this._seatStateMapMutex = new Mutex();
+
+    this._updateContext = updateContextCallback ?? (() => {});
   }
 
   checkSeatSelectionValidity(newSeatIds: string[]): SeatSelectionResult[] {
@@ -95,6 +99,7 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
           this.selection.push(seatId);
         }
       });
+      this._updateContext();
       return results;
     });
   }
@@ -109,9 +114,10 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
     }
     return await this._seatStateMapMutex.withLock(() => {
       seatIds.forEach(id => {
-        this.seatStateMap.get(id)!.selected = true;
+        this.seatStateMap.get(id)!.selected = false;
       });
       this.selection = this.selection.filter(id => !seatIds.includes(id));
+      this._updateContext();
     });
   }
 
