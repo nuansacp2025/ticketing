@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import {
   Chart as ChartJS,
@@ -84,7 +84,6 @@ export default function AdminPage() {
         return res.json();
       })
       .then((data: Record<string, Omit<Ticket, 'id'>>) => {
-        console.log(data);
         const ticketsArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
         setTickets(ticketsArray);
       })
@@ -100,12 +99,6 @@ export default function AdminPage() {
       .catch(err => console.error('Error fetching seats:', err));
   }, [isLoggedIn]);
 
-  useEffect(() => {
-    console.log("Customer: ", customers);
-    console.log("Ticket: ", tickets);
-    console.log("Seat: ", seats);
-  }, [customers, tickets, seats]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -116,7 +109,6 @@ export default function AdminPage() {
       });
       if(res.ok) {
         const data = await res.json();
-        console.log(data);
         if (data.success) {
           setIsLoggedIn(true);
           setError(null);

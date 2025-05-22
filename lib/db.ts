@@ -162,7 +162,6 @@ export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
     const data = docSnap.data();
     seatsAvailability.set(docSnap.id, data.isAvailable);
   });
-  console.log(seatsAvailability);
   return seatsAvailability;
 }
 
