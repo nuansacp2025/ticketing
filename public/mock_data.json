@@ -1,0 +1,115 @@
+{
+    "customers": {
+        "customers_1": {
+            "email": "mock_email1@example.com",
+            "ticketIds": [
+                "tickets_1",
+                "tickets_2",
+                "tickets_3"
+            ]
+        },
+        "customers_2": {
+            "email": "mock_email2@example.com",
+            "ticketIds": [
+                "tickets_4",
+                "tickets_5"
+            ]
+        },
+        "customers_3": {
+            "email": "mock_email3@example.com",
+            "ticketIds": [
+                "tickets_6"
+            ]
+        }
+    },
+    "tickets": {
+        "tickets_1": {
+            "code": "mock_code1",
+            "category": "mock_category1",
+            "seatConfirmed": true,
+            "checkedIn": false
+        },
+        "tickets_2": {
+            "code": "mock_code2",
+            "category": "mock_category2",
+            "seatConfirmed": true,
+            "checkedIn": false
+        },
+        "tickets_3": {
+            "code": "mock_code3",
+            "category": "mock_category3",
+            "seatConfirmed": true,
+            "checkedIn": false
+        },
+        "tickets_4": {
+            "code": "mock_code4",
+            "category": "mock_category4",
+            "seatConfirmed": false,
+            "checkedIn": false
+        },
+        "tickets_5": {
+            "code": "mock_code5",
+            "category": "mock_category5",
+            "seatConfirmed": false,
+            "checkedIn": false
+        },
+        "tickets_6": {
+            "code": "mock_code6",
+            "category": "mock_category6",
+            "seatConfirmed": false,
+            "checkedIn": false
+        }
+    },
+    "seats": {
+        "seats_1": {
+            "id": "seats_1",
+            "isAvailable": false,
+            "reservedBy": "tickets_1"
+        },
+        "seats_2": {
+            "id": "seats_2",
+            "isAvailable": false,
+            "reservedBy": "tickets_2"
+        },
+        "seats_3": {
+            "id": "seats_3",
+            "isAvailable": false,
+            "reservedBy": "tickets_3"
+        },
+        "seats_4": {
+            "id": "seats_4",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_5": {
+            "id": "seats_5",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_6": {
+            "id": "seats_6",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_7": {
+            "id": "seats_7",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_8": {
+            "id": "seats_8",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_9": {
+            "id": "seats_9",
+            "isAvailable": true,
+            "reservedBy": null
+        },
+        "seats_10": {
+            "id": "seats_10",
+            "isAvailable": true,
+            "reservedBy": null
+        }
+    }
+}

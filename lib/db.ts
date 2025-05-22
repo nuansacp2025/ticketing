@@ -51,7 +51,7 @@ export async function getCustomers(): Promise<Customer[]> {
     snap.forEach(docSnap => {
         const data = docSnap.data();
         customers.push({
-            id: data.id,
+            id: docSnap.id,
             email: data.email,
             ticketIds: data.ticketIds
         });
@@ -87,7 +87,7 @@ export async function getTickets(): Promise<Ticket[]> {
     snap.forEach(docSnap => {
         const data = docSnap.data();
         tickets.push({
-            id: data.id,
+            id: docSnap.id,
             code: data.code,
             category: data.category,
             seatConfirmed: data.seatConfirmed,
