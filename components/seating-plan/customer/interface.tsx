@@ -44,7 +44,7 @@ export function CustomerSeatingPlanInterface() {
           </TransformComponent>
           <div className="flex-1 flex flex-col">
             <MiniMap width={300}>
-              <Image fill  src="/captain_america.png" alt="Click to enlarge map" onClick={() => setMapPopupVisibility(true)} />
+              <Image fill src="/seating_plan_cropped.jpg" alt="Click to enlarge map" onClick={() => setMapPopupVisibility(true)} />
             </MiniMap>
             <div className="flex-1 flex flex-col">
               {contextValue.manager.selection.map(id => (
