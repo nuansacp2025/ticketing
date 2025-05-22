@@ -5,8 +5,9 @@ export interface SeatMetadata {
   location: {
     x: number,
     y: number,
+    rot: number,  // in degrees, clockwise
   },
-  selectable: boolean,
+  notSelectable: boolean,
   type: SeatType,
 }
 
@@ -18,19 +19,15 @@ export interface SeatType {
   },
   themes: {
     notSelectable: React.FunctionComponent<{ children: ReactNode }>,
+    taken: React.FunctionComponent<{ children: ReactNode }>,
     selected: React.FunctionComponent<{ children: ReactNode }>,
     default: React.FunctionComponent<{ children: ReactNode }>,
   },
 }
 
-export class BaseSeatState {
+export interface BaseSeatState {
   selected: boolean
   taken: boolean
-
-  constructor(selected: boolean, taken: boolean) {
-    this.selected = selected;
-    this.taken = taken;
-  }
 }
 
 export interface SeatSelectionResult {

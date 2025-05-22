@@ -18,10 +18,10 @@ export const SeatingPlanContext = React.createContext<SeatingPlanContextType | n
 
 interface SeatComponentProps {
   id: string,
-  children: ReactNode,
+  children?: ReactNode,
 }
 
-function Seat({ id, children }: SeatComponentProps) {
+export function SeatComponent({ id, children }: SeatComponentProps) {
   const context = React.useContext(SeatingPlanContext);
   if (context === null) {
     return (
@@ -38,10 +38,13 @@ function Seat({ id, children }: SeatComponentProps) {
   const { width, height } = seatMetadata.type.style;
   
   const themes = seatMetadata.type.themes;
-  const CurrentTheme = !seatMetadata.selectable ? themes.notSelectable : seatState.selected ? themes.selected : themes.default;
+  const CurrentTheme = seatMetadata.notSelectable ? themes.notSelectable
+    : seatState.taken ? themes.taken
+    : seatState.selected ? themes.selected
+    : themes.default;
   
   async function handleSeatClick() {
-    if (!seatMetadata.selectable) return;
+    if (seatMetadata.notSelectable || seatState.taken) return;
     if (seatState.selected) {
       await manager.unselectSeat(id);
     } else {
@@ -53,8 +56,8 @@ function Seat({ id, children }: SeatComponentProps) {
   return (
     <div
       style={{
-        width, height,
-        position: "relative",
+        width, height, rotate: `${seatMetadata.location.rot}deg`,
+        position: "absolute",
         top: (seatMetadata.location.y - height/2),
         left: (seatMetadata.location.x - width/2),
       }}
@@ -76,12 +79,8 @@ export function SeatingPlan() {
   }
   
   return (
-    <div style={{ width: context.width, height: context.height }}>
-      {Array.from(context.manager.seatMap.keys()).map(id => (
-        <Seat id={id}>
-          {context.seatContentBuilder(id)}
-        </Seat>
-      ))}
+    <div style={{ width: "800px", height: "600px" }}>
+      {Array.from(context.manager.seatMap.keys()).map(id => context.seatContentBuilder(id))}
     </div>
   );
 }
