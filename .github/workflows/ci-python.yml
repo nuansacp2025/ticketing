@@ -22,4 +22,4 @@ jobs:
         pip install -r requirements.txt
 
     - name: Build application
-      run: python -m py_compile **.py
+      run: python -m compileall -q .
