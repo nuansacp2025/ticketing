@@ -16,9 +16,9 @@ jobs:
       with:
         node-version: '20'
 
-    - name: “Write .env.local from Secrets”
+    - name: “Write .env from Secrets”
       run: |
-        cat <<EOF > .env.local
+        cat <<EOF > .env
         FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
         FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
         FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
