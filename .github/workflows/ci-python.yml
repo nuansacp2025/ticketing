@@ -2,8 +2,6 @@ name: Python CI
 
 on:
   push:
-    paths:
-      - '**.py'
 
 jobs:
   build:
@@ -24,4 +22,4 @@ jobs:
         pip install -r requirements.txt
 
     - name: Build application
-      run: python -m py_compile
+      run: python -m py_compile **.py
