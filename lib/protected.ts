@@ -10,6 +10,9 @@ export interface Profile {
 
 export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     const customer = await getCustomerByTicketId(ticketId);
+    if (customer == null || customer == undefined) {
+        throw new Error("TicketId Not Found");
+    }
     const ticket = await getTicket(ticketId);
     if (customer === null || ticket === null) return null;
     const mySeats = Array.from((await getSeats()).entries())
