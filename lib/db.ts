@@ -135,6 +135,38 @@ export async function getCustomerByTicketId(ticketId: string): Promise<Customer 
     return customer;
 }
 
+export async function getSeatsQuery(filters: {
+    id?: string,
+    isAvailable?: boolean,
+    reservedBy?: string | null
+}): Promise<Seat[]> {
+    const seatsRef = collection(db, 'seats');
+    let q = query(seatsRef);
+
+    if (filters.id) {
+        q = query(q, where('id', '==', filters.id));
+    }
+    if (filters.isAvailable !== undefined) {
+        q = query(q, where('isAvailable', '==', filters.isAvailable));
+    }
+    if (filters.reservedBy !== undefined) {
+        q = query(q, where('reservedBy', '==', filters.reservedBy));
+    }
+
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return [];
+    
+    const seats: Seat[] = [];
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        seats.push({
+            id: docSnap.id,
+            isAvailable: data.isAvailable,
+            reservedBy: data.reservedBy ?? null
+        });
+    });
+    return seats;
+}
   
 export async function getSeats(): Promise<Seat[]> {
     const snap = await getDocs(collection(db, "seats"));

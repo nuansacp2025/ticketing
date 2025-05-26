@@ -1,4 +1,5 @@
 import { getCustomerByTicketId, getSeats, getTicket, setTicketCheckedIn } from "./db";
+import { ConflictError, NotFoundError } from "./error";
 
 export interface Profile {
     email: string,
@@ -27,10 +28,10 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
 export async function updateCheckedInStatus(ticketId: string) {
     const ticket = await getTicket(ticketId);
     if (ticket == null) {
-        throw new Error("Ticket not found");
+        throw new NotFoundError("Ticket not found");
     }
     if (ticket?.checkedIn) {
-        throw new Error("Ticket already Checked In");
+        throw new ConflictError("Ticket already checked in");
     }
     await setTicketCheckedIn(ticketId);
 }
