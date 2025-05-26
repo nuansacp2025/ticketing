@@ -14,14 +14,15 @@ import { Stats } from '@/components/admin/stats';
 import { CustomerTable } from '@/components/admin/customer-table';
 import { JoinedTicketTable } from '@/components/admin/joined-ticket-table';
 import { JoinedSeatTable } from '@/components/admin/joined-seat-table';
+import { TicketCheckIn } from '@/components/admin/ticket-checkin';
 
 // register AG Grid community modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-type Tab = 'Customers' | 'Tickets' | 'Seats' | 'Statistics';
-const tabs: Tab[] = ['Customers', 'Tickets', 'Seats', 'Statistics'];
+type Tab = 'CheckIn' | 'Customers' | 'Tickets' | 'Seats' | 'Statistics';
+const tabs: Tab[] = ['CheckIn', 'Customers', 'Tickets', 'Seats', 'Statistics'];
 
 export default function AdminPage() {
   // Authentication state
@@ -31,7 +32,7 @@ export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Data state
-  const [activeTab, setActiveTab] = useState<Tab>('Customers');
+  const [activeTab, setActiveTab] = useState<Tab>('CheckIn');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
@@ -49,25 +50,6 @@ export default function AdminPage() {
   // Fetch data only when logged in
   useEffect(() => {
     if (!isLoggedIn) return;
-    // fetch('/mock_data.json')
-    //   .then(res => {
-    //     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    //     return res.json();
-    //   })
-    //   .then((data: {
-    //     customers: Record<string, Omit<Customer, 'id'>>;
-    //     tickets: Record<string, Omit<Ticket, 'id'>>;
-    //     seats: Record<string, Omit<Seat, 'id'>>;
-    //   }) => {
-    //     const customersArray = Object.entries(data.customers).map(([id, value]) => ({ id, ...value }));
-    //     const ticketsArray   = Object.entries(data.tickets).map(([id, value]) => ({ id, ...value }));
-    //     const seatsArray     = Object.entries(data.seats).map(([id, value]) => ({ id, ...value }));
-    //     setCustomers(customersArray);
-    //     setTickets(ticketsArray);
-    //     setSeats(seatsArray);
-    //   })
-    //   .catch(err => console.error('Error fetching data:', err));
-    // Fetch data
     fetch('/api/getAllCustomers')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -90,6 +72,7 @@ export default function AdminPage() {
       .catch(err => console.error('Error fetching tickets:', err));
     fetch('/api/getAllSeats')
       .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
       .then((data: Record<string, Omit<Seat, 'id'>>) => {
@@ -102,12 +85,12 @@ export default function AdminPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('api/loginAdmin', {
+      const res = await fetch('/api/loginAdmin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if(res.ok) {
+      if (res.ok) {
         const data = await res.json();
         if (data.success) {
           setIsLoggedIn(true);
@@ -118,26 +101,24 @@ export default function AdminPage() {
       } else {
         const data = await res.json();
         setError(data.error || 'Login failed');
-        return;
       }
     } catch (err) {
       console.error('Login error:', err);
       setError('Login failed');
-      return;
     }
   };
 
   // Styles
   const container = { background: '#010a04', padding: 24, minHeight: '100vh', color: '#e6f2e6' };
-  const header    = { fontSize: '2rem', marginBottom: 16, color: '#fff' };
-  const tabsBar   = { display: 'flex', gap: 12, marginBottom: 24 };
-  const tabBtn    = (active: boolean) => ({
+  const header = { fontSize: '2rem', marginBottom: 16, color: '#fff' };
+  const tabsBar = { display: 'flex', gap: 12, marginBottom: 24 };
+  const tabBtn = (active: boolean) => ({
     padding: '8px 16px', cursor: 'pointer', borderRadius: 4,
     background: active ? '#006400' : 'transparent',
     border: active ? '1px solid #006400' : '1px solid transparent',
     color: active ? '#fff' : '#a0a0a0', fontWeight: active ? 600 : 400,
   });
-  const section   = { marginBottom: 32 };
+  const section = { marginBottom: 32 };
 
   // If not logged in, render login form
   if (!isLoggedIn) {
@@ -173,21 +154,41 @@ export default function AdminPage() {
       <h1 style={header}>Admin Dashboard</h1>
       <div style={tabsBar}>
         {tabs.map(t => (
-          <button key={t} style={tabBtn(t === activeTab)} onClick={() => setActiveTab(t)}>
-            {t}
+          <button
+            key={t}
+            style={tabBtn(t === activeTab)}
+            onClick={() => setActiveTab(t)}
+          >
+            {t === 'CheckIn' ? 'Ticket Check-In' : t}
           </button>
         ))}
       </div>
 
+      {activeTab === 'CheckIn' && (
+        <div style={section}>
+          <h2>Ticket Check-In</h2>
+          <TicketCheckIn/>
+        </div>
+      )}
+
       {activeTab === 'Customers' && (
-        <div style={section}><CustomerTable customers={customers} /></div>
+        <div style={section}>
+          <CustomerTable customers={customers} />
+        </div>
       )}
+
       {activeTab === 'Tickets' && (
-        <div style={section}><JoinedTicketTable tickets={tickets} customers={customers} /></div>
+        <div style={section}>
+          <JoinedTicketTable tickets={tickets} customers={customers} />
+        </div>
       )}
+
       {activeTab === 'Seats' && (
-        <div style={section}><JoinedSeatTable tickets={tickets} customers={customers} seats={seats} /></div>
+        <div style={section}>
+          <JoinedSeatTable tickets={tickets} customers={customers} seats={seats} />
+        </div>
       )}
+
       {activeTab === 'Statistics' && <Stats customers={customers} tickets={tickets} seats={seats} />}
     </div>
   );
