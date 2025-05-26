@@ -31,6 +31,7 @@ export interface Seat {
     id: string,
     isAvailable: boolean,
     reservedBy: string | null,
+    category: string,
 }
 
 export async function getCustomer(id: string): Promise<Customer | null> {
@@ -152,7 +153,8 @@ export async function getSeats(): Promise<Seat[]> {
         seats.push({
             id: docSnap.id,
             isAvailable: data.isAvailable,
-            reservedBy: data.reservedBy ?? null
+            reservedBy: data.reservedBy ?? null,
+            category: data.category
         });
     });
 
