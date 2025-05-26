@@ -3,7 +3,9 @@ import { getCustomerByTicketId, getSeats, getTicket, setTicketCheckedIn } from "
 export interface Profile {
     email: string,
     ticketCode: string,
-    ticketCategory: string,
+    catA: Number,
+    catB: Number,
+    catC: Number,
     seatConfirmed: boolean,
     seatIds: string[],
 }
@@ -21,7 +23,9 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     return {
         email: customer.email,
         ticketCode: ticket.code,
-        ticketCategory: ticket.category,
+        catA: ticket.catA,
+        catB: ticket.catB,
+        catC: ticket.catC,
         seatConfirmed: ticket.seatConfirmed,
         seatIds: mySeats,
     };
