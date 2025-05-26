@@ -20,7 +20,9 @@ export interface Customer {
 export interface Ticket {
     id: string,
     code: string,
-    category: string,
+    catA: Number,
+    catB: Number,
+    catC: Number,
     seatConfirmed: boolean,
     checkedIn: boolean
 }
@@ -89,7 +91,9 @@ export async function getTickets(): Promise<Ticket[]> {
         tickets.push({
             id: docSnap.id,
             code: data.code,
-            category: data.category,
+            catA: data.catA,
+            catB: data.catB,
+            catC: data.catC,
             seatConfirmed: data.seatConfirmed,
             checkedIn: data.checkedIn
         });
@@ -113,7 +117,9 @@ export async function getTicketByCode(code: string) {
     const ticket: Ticket = {
         id: doc.id,
         code: doc.data().code,
-        category: doc.data().category,
+        catA: doc.data().catA,
+        catB: doc.data().catB,
+        catC: doc.data().catC,
         seatConfirmed: doc.data().seatConfirmed,
         checkedIn: doc.data().checkedIn
     };
