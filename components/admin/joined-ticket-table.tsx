@@ -35,7 +35,6 @@ export const JoinedTicketTable: React.FC<{
         { field: 'seatConfirmed', headerName: 'Seat Confirmed' },
         { field: 'checkedIn',     headerName: 'Checked In' },
         { field: 'customerId',    headerName: 'Customer ID' },
-        { field: 'seatId',        headerName: 'Seat ID' },
     ];
 
     const defaultColDef: ColDef = {

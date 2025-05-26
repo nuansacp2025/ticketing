@@ -59,29 +59,56 @@ export const TicketCheckIn = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '0 auto' }}>
-      <form onSubmit={handleCheckIn} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+    <div style={{ maxWidth: 480, margin: '2rem auto', padding: '1.5rem', backgroundColor: '#002a10', borderRadius: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.4)', color: '#e6f2e6', fontFamily: 'Segoe UI, sans-serif' }}>
+
+      {/* Header */}
+      <h3 style={{ textAlign: 'center', marginBottom: '1rem', fontSize: '1.5rem', letterSpacing: '0.5px' }}>
+        🎫 Ticket Check-In
+      </h3>
+
+      {/* Input Form */}
+      <form onSubmit={handleCheckIn} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '1rem' }}>
         <input
           type="text"
-          placeholder="Enter Ticket ID"
+          placeholder="Ticket ID"
           value={ticketId}
           onChange={e => setTicketId(e.target.value)}
-          style={{ flex: 1, padding: 8, borderRadius: 4, border: '1px solid #004b23' }}
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: 6,
+            border: '2px solid #006400',
+            backgroundColor: '#013220',
+            color: '#e6f2e6',
+            fontSize: '1rem',
+            outline: 'none'
+          }}
         />
         <button
           type="submit"
-          style={{ padding: '8px 16px', background: '#006400', color: '#fff', border: 'none', borderRadius: 4 }}
+          style={{
+            padding: '0.75rem 1.25rem',
+            borderRadius: 6,
+            backgroundColor: '#006400',
+            color: '#fff',
+            border: 'none',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#338a3e')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#006400')}
         >
           Check In
         </button>
       </form>
 
+      {/* Status Message */}
       {statusMessage && (
         <div style={{
           padding: '0.75rem 1rem',
           borderRadius: 6,
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          color: '#e6f2e6',
+          backgroundColor: 'rgba(102, 187, 106, 0.2)',
+          color: '#66bb6a',
           textAlign: 'center',
           marginBottom: '1rem',
           fontWeight: 500
@@ -90,27 +117,32 @@ export const TicketCheckIn = () => {
         </div>
       )}
 
+      {/* Seats Display */}
       {relatedSeats.length > 0 && (
         <div>
-          <h4 style={{ color: '#e6f2e6', marginBottom: '0.5rem' }}>Seats for Ticket {checkedInTicketId}:</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <h4 style={{ marginBottom: '0.75rem', fontSize: '1.1rem', textAlign: 'center' }}>
+            Seats for Ticket {checkedInTicketId}
+          </h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
             {relatedSeats.map(seat => (
-              <span
+              <div
                 key={seat.id}
                 style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#006400',
+                  padding: '0.5rem',
+                  backgroundColor: '#004b23',
                   borderRadius: 4,
-                  color: '#fff',
-                  fontSize: '0.9rem'
+                  textAlign: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
                 }}
               >
                 {seat.id}
-              </span>
+              </div>
             ))}
           </div>
         </div>
       )}
+
     </div>
   );
 };
