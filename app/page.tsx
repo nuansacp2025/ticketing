@@ -10,7 +10,7 @@ export default function Home() {
           <h3>presents</h3>
         </div>
         <div className="relative flex-1 w-full">
-          <Image src="/images/home/the-crying-stone.png" alt="The Crying Stone" fill style={{ objectFit="contain" }} />
+          <Image src="/images/home/the-crying-stone.png" alt="The Crying Stone" fill style={{ objectFit: "contain" }} />
         </div>
         <div className="flex flex-col items-center">
           <p>Early bird sale ends on 1 July. Limited seats available.</p>
