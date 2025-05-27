@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import {
   ModuleRegistry,
   AllCommunityModule,
   ColDef,
+  GridApi,
   GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
@@ -15,7 +16,12 @@ export const JoinedSeatTable: React.FC<{
   tickets: Ticket[];
   seats: Seat[];
 }> = ({ customers, tickets, seats }) => {
-    const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
+    const gridApi = useRef<GridApi | null>(null);
+    const gridOnReady = (e: GridReadyEvent) => {
+      gridApi.current = e.api;
+      e.api.sizeColumnsToFit();
+    }
+
     const rowData = useMemo(() =>
         seats.map(s => {
             const ticket = tickets.find(t => t.id === s.reservedBy);
@@ -59,6 +65,15 @@ export const JoinedSeatTable: React.FC<{
     resizable: true,
   };
 
+  const exportCsv = () => {
+    if (gridApi.current) {
+      gridApi.current.exportDataAsCsv({
+        fileName: 'joined_seat_data.csv',
+        columnKeys: ['seatId', 'available', 'reservedBy', 'ticketId', 'code', 'category', 'seatConfirmed', 'checkedIn', 'customerId'],
+      });
+    }
+  }
+
   return (
     <div style={{ width: '100%' }}>
       <AgGridReact
@@ -71,6 +86,26 @@ export const JoinedSeatTable: React.FC<{
         animateRows={true}
         onGridReady={gridOnReady}
       />
+      <button
+        onClick={exportCsv}
+        className={`
+          mt-4
+          px-4 py-2
+          bg-gradient-to-br from-green-500 to-green-600
+          text-white text-sm font-semibold
+          rounded-lg
+          shadow-md
+          hover:-translate-y-1 hover:shadow-lg
+          active:translate-y-0
+          focus:outline-none
+
+          /* custom “click” cursor on hover */
+          cursor-pointer
+          hover:cursor-pointer
+        `}
+      >
+        Export CSV
+      </button>
     </div>
   );
 };

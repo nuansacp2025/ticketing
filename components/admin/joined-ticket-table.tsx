@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
-import { AgGridReact }      from 'ag-grid-react';
-import { ModuleRegistry,
-         AllCommunityModule,
-         ColDef, 
-         GridReadyEvent}           from 'ag-grid-community';
-import { darkGreenTheme }    from '@/app/ag-grid-theme';
+import React, { useRef, useMemo } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import { 
+    ModuleRegistry,
+    AllCommunityModule,
+    ColDef,
+    GridApi,
+    GridReadyEvent
+} from 'ag-grid-community';
+import { darkGreenTheme } from '@/app/ag-grid-theme';
 
 ModuleRegistry.registerModules([ AllCommunityModule ]);
 
@@ -12,7 +15,11 @@ export const JoinedTicketTable: React.FC<{
   customers: Customer[];
   tickets:   Ticket[];
 }> = ({ customers, tickets }) => {
-    const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
+    const gridApi = useRef<GridApi | null>(null);
+    const gridOnReady = (e: GridReadyEvent) => {
+        gridApi.current = e.api;
+        e.api.sizeColumnsToFit();
+    }
     // Join tickets, customer, seat
     const rowData = useMemo(() => tickets.map(t => {
         const owner = customers.find(c => c.ticketIds.includes(t.id));
@@ -45,6 +52,15 @@ export const JoinedTicketTable: React.FC<{
         filter: true,
     };
 
+    const exportCsv = () => {
+        if (gridApi.current) {
+            gridApi.current.exportDataAsCsv({
+                fileName: 'joined_ticket_data.csv',
+                columnKeys: ['ticketId', 'code', 'category', 'seatConfirmed', 'checkedIn', 'customerId'],
+            });
+        }
+    }
+
     return (
         <div style={{ width: '100%' }}>
         <AgGridReact
@@ -57,6 +73,26 @@ export const JoinedTicketTable: React.FC<{
             pagination={true}
             animateRows={true}
         />
+        <button
+            onClick={exportCsv}
+            className={`
+            mt-4
+            px-4 py-2
+            bg-gradient-to-br from-green-500 to-green-600
+            text-white text-sm font-semibold
+            rounded-lg
+            shadow-md
+            hover:-translate-y-1 hover:shadow-lg
+            active:translate-y-0
+            focus:outline-none
+
+            /* custom “click” cursor on hover */
+            cursor-pointer
+            hover:cursor-pointer
+            `}
+        >
+            Export CSV
+        </button>
         </div>
     );
 };
