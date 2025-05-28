@@ -9,8 +9,8 @@ import React from "react";
 export default function Home() {
   const [dialogIsOpen, setDialogIsOpen] = React.useState(false);
 
-  const openDialog = () => {setDialogIsOpen(true)};
-  const closeDialog = () => {setDialogIsOpen(false)};
+  const openDialog = () => { setDialogIsOpen(true) };
+  const closeDialog = () => { setDialogIsOpen(false) };
 
   return (
     <>
@@ -39,28 +39,29 @@ export default function Home() {
           </FancyButton>
         </div>
       </div>
-      <Dialog open={dialogIsOpen} onClose={closeDialog} className="relative z-10">
+      <Dialog open={dialogIsOpen} onClose={closeDialog} className="relative inset-0 z-10">
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
-        <div className="fixed inset-0 flex w-screen items-center justify-center text-background text-center">
-          <DialogPanel className="w-full max-w-[720px] h-2/3 px-12 py-24 flex flex-col items-center justify-between bg-[#EEEEEE] rounded-2xl">
-            <DialogTitle className="text-4xl font-medium">Looking to buy tickets?</DialogTitle>
-            <div className="text-md font-light space-y-2">
-              <p>By clicking below, you will be redirected to our store front page.</p>
-              <p>You will be able to choose your seat allocation on this website after we have sent you a confirmation email for your purchase. This may take up to 72 hours after transaction.</p>
+        <div className="fixed inset-0 flex items-center justify-center text-background text-center">
+          <DialogPanel className="w-full max-w-[720px] h-2/3 m-8 flex flex-col items-center justify-center bg-[#EEEEEE] rounded-2xl">
+            <div className="h-full max-h-[540px] m-12 sm:my-24 flex flex-col items-center justify-between space-y-6 overflow-scroll">
+              <DialogTitle className="text-4xl font-medium">Looking to buy tickets?</DialogTitle>
+              <div className="text-md font-light space-y-2">
+                <p>By clicking below, you will be redirected to our store front page.</p>
+                <p>You will be able to choose your seat allocation on this website after we have sent you a confirmation email for your purchase. This may take up to 72 hours after transaction.</p>
+              </div>
+              <div className="w-full space-y-4">
+                <RegularButton variant="black" sizeClass="w-full max-w-[480px] h-[48px] rounded-3xl">
+                  <span className="text-lg font-medium">Take me to the store!</span>
+                </RegularButton>
+                <Link href="/login">
+                  <p className="text-md">
+                    <InlineButton>
+                      I have purchased my tickets and have received a confirmation email!
+                    </InlineButton>
+                  </p>
+                </Link>
+              </div>
             </div>
-            <div className="w-full space-y-4">
-              <RegularButton variant="black" sizeClass="w-[480px] h-[48px] rounded-3xl">
-                <span className="text-lg font-medium">Take me to the store!</span>
-              </RegularButton>
-              <Link href="/login">
-                <p className="text-md">
-                  <InlineButton>
-                    I have purchased my tickets and have received a confirmation email!
-                  </InlineButton>
-                </p>
-              </Link>
-            </div>
-            
           </DialogPanel>
         </div>
       </Dialog>
