@@ -13,6 +13,6 @@ export async function GET(request: NextRequest) {
         const profile = await getMyProfile(ticketId)!;
         return NextResponse.json(profile, { status: 200 });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(error);
     }
 }

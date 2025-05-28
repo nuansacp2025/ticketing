@@ -13,11 +13,9 @@ export async function GET(request: NextRequest) {
     try {
         const decoded = await verifyAdmin(token);
 
-        if (!decoded.admin) throw new Error("Not an admin");
-
         const seats = await getSeats(); // Ensure it's awaited if async
         return NextResponse.json(seats, { status: 200 });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(error);
     }
 }

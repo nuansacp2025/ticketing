@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { setSeatsReserved } from "@/lib/db";
+import { setSeatsReserved } from "@/lib/protected";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
@@ -13,6 +13,6 @@ export async function POST(request: NextRequest) {
     await setSeatsReserved(body.ids, body.ticketIds);
     return NextResponse.json({ status: 200 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json(error);
   }
 }
