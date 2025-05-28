@@ -14,11 +14,9 @@ export async function POST(request: NextRequest) {
         const decoded = await verifyAdmin(token);
 
         const body = await request.json(); 
-
-        if (!decoded.admin) throw new Error("Not an admin");
         await updateCheckedInStatus(body.ticketId);
         return NextResponse.json({ status: 200, error: "" });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(error);
     }
 }

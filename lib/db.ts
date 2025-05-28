@@ -103,12 +103,6 @@ export async function getTickets(): Promise<Ticket[]> {
     return tickets;
 }
 
-export async function setTicketCheckedIn(ticketId: string): Promise<void> {
-    const ticketRef = doc(db, "tickets", ticketId);
-    await updateDoc(ticketRef, { checkedIn: true });
-}
-
-  
 export async function getTicketByCode(code: string) {
     const ticketsRef = collection(db, 'tickets');
     const q = query(ticketsRef, where('code', '==', code));
@@ -161,42 +155,3 @@ export async function getSeats(): Promise<Seat[]> {
     return seats;
 }
   
-export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
-  const snap = await getDocs(collection(db, "seats"));
-  let seatsAvailability = new Map<String, boolean>();
-  if (snap.empty) return seatsAvailability;
-
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    seatsAvailability.set(docSnap.id, data.isAvailable);
-  });
-  console.log(seatsAvailability);
-  return seatsAvailability;
-}
-
-export async function setSeatsReserved(ids: string[], ticketIds: string[]) {
-  await runTransaction(db, async (transaction) => {
-    for (let i = 0; i < ids.length; i++) {
-      const seatRef = doc(db, "seats", ids[i]);
-      const seatDoc = await getDoc(seatRef);
-      const ticketRef = doc(db, "tickets", ticketIds[i]);
-      const ticketDoc = await getDoc(ticketRef);
-      if (!ticketDoc.exists()) {
-        throw new Error("Ticket(s) are not exist");
-      }
-      // Assumption: ticket can only confirm seat at most once
-      if (ticketDoc.data().seatConfirmed) {
-        throw new Error("Ticket(s) have confirmed seat(s)")
-      }
-      if (!seatDoc.exists() || seatDoc.data().isAvailable == false) {
-        throw new Error("Seat(s) are not available");
-      }
-    }
-    for (let i = 0; i < ids.length; i++) {
-      const seatRef = doc(db, "seats", ids[i]);
-      const ticketRef = doc(db, "tickets", ticketIds[i]);
-      await updateDoc(seatRef, { isAvailable: false, reservedBy: ticketIds[i] });
-      await updateDoc(ticketRef, { seatConfirmed: true });
-    }
-  });
-}
