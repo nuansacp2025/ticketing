@@ -1,6 +1,32 @@
-import { BaseSeatingPlanManager, BaseSeatState, SeatSelectionResult } from "../types";
+import { BaseSeatingPlanManager, SeatMetadata, SeatSelectionResult, SeatState } from "../types";
 
-export class CustomerSeatingPlanManager extends BaseSeatingPlanManager<BaseSeatState> {
+export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
+  lastOperation: any
+  isolatedSeatIds: Set<string>
+  
+  constructor(
+    seatMap: ReadonlyMap<string, SeatMetadata>,
+    initialSeatStateMap: ReadonlyMap<string, SeatState>,
+    defaultLevel: string,
+    updateContextCallback?: () => void,
+  ) {
+    super(seatMap, initialSeatStateMap, defaultLevel);
+    this.lastOperation = undefined;  // TODO: at this point should be "init" operation
+    this.isolatedSeatIds = new Set();
+    this.updateIsolatedSeatIdsFromLastOperation();
+
+    if (updateContextCallback) {
+      this._updateContext = () => {
+        this.updateIsolatedSeatIdsFromLastOperation();
+        updateContextCallback();
+      }
+    }
+  }
+
+  updateIsolatedSeatIdsFromLastOperation() {
+    return;  // TODO: update from operation "init"/"select"/"unselect"/"taken"/"released"
+  }
+
   checkSeatSelectionValidity(newSeatIds: string[]): SeatSelectionResult[] {
     // TODO: Add logic for ticket category and certain seat types (e.g. wheelchair)
     const results: SeatSelectionResult[] = [];

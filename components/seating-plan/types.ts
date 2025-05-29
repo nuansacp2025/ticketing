@@ -1,5 +1,5 @@
 import { Mutex } from "@/lib/utils";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 export interface SeatMetadata {
   location: {
@@ -8,6 +8,9 @@ export interface SeatMetadata {
     rot: number,  // in degrees, clockwise
   },
   notSelectable: boolean,
+  level: string,
+  leftId: string | null,
+  rightId: string | null,
   type: SeatType,
 }
 
@@ -18,14 +21,14 @@ export interface SeatType {
     height: number,
   },
   themes: {
-    notSelectable: React.FunctionComponent<{ children: ReactNode }>,
-    taken: React.FunctionComponent<{ children: ReactNode }>,
-    selected: React.FunctionComponent<{ children: ReactNode }>,
-    default: React.FunctionComponent<{ children: ReactNode }>,
+    notSelectable: React.FC<{ children: ReactNode }>,
+    taken: React.FC<{ children: ReactNode }>,
+    selected: React.FC<{ children: ReactNode }>,
+    default: React.FC<{ children: ReactNode }>,
   },
 }
 
-export interface BaseSeatState {
+export interface SeatState {
   selected: boolean
   taken: boolean
 }
@@ -36,9 +39,11 @@ export interface SeatSelectionResult {
   failureReason: string,
 }
 
-export class BaseSeatingPlanManager<T extends BaseSeatState> {
+export class BaseSeatingPlanManager {
   seatMap: Map<string, SeatMetadata>
-  seatStateMap: Map<string, T>
+  seatStateMap: Map<string, SeatState>
+
+  currentLevel: string
 
   selection: string[]
 
@@ -48,11 +53,14 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
 
   constructor(
     seatMap: ReadonlyMap<string, SeatMetadata>,
-    initialSeatStateMap: ReadonlyMap<string, T>,
+    initialSeatStateMap: ReadonlyMap<string, SeatState>,
+    defaultLevel: string,
     updateContextCallback?: () => void,
   ) {
     this.seatMap = new Map(seatMap);
     this.seatStateMap = new Map(initialSeatStateMap);
+    
+    this.currentLevel = defaultLevel;
 
     this.selection = Array.from(this.seatStateMap.entries())
       .filter(([_, state]) => state.selected).map(([id, _]) => id);
@@ -123,5 +131,10 @@ export class BaseSeatingPlanManager<T extends BaseSeatState> {
 
   async unselectAllSeats(): Promise<void> {
     await this.unselectSeats(Array.from(this.seatMap.keys()));
+  }
+
+  setCurrentLevel(level: string) {
+    this.currentLevel = level;
+    this._updateContext();
   }
 }

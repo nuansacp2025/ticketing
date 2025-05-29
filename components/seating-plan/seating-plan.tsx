@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
-import { BaseSeatingPlanManager, SeatSelectionResult } from "./types";
+import { BaseSeatingPlanManager as MType, SeatSelectionResult } from "./types";
 
-export interface SeatingPlanContextType {
+export interface SeatingPlanContextType<T extends MType> {
   width: number,
   height: number,
   stageLocation: {
@@ -9,29 +9,26 @@ export interface SeatingPlanContextType {
     y: { start: number, length: number },
   },
 
-  manager: BaseSeatingPlanManager<any>,
+  manager: T,
   seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
-  seatContentBuilder: (id: string) => ReactNode,
+  SeatComponent: React.FC<{ id: string }>,
   StageContent: React.FunctionComponent,
 }
 
-export const SeatingPlanContext = React.createContext<SeatingPlanContextType | null>(null);
-
-interface SeatComponentProps {
+interface SeatComponentProps<T extends MType> {
   id: string,
+  context: React.Context<SeatingPlanContextType<T> | null>,
   children?: ReactNode,
 }
 
-export function SeatComponent({ id, children }: SeatComponentProps) {
-  const context = React.useContext(SeatingPlanContext);
-  if (context === null) {
-    return (
-      <div>Loading...</div>
-    );
+export function SeatWrapper<T extends MType>({ id, context, children }: SeatComponentProps<T>) {
+  const contextValue = React.useContext(context);
+  if (contextValue === null) {
+    return <></>;
   }
 
-  const manager = context.manager;
-  const resultHandler = (result: SeatSelectionResult) => context.seatSelectionResultsHandler([result]);
+  const manager = contextValue.manager;
+  const resultHandler = (result: SeatSelectionResult) => contextValue.seatSelectionResultsHandler([result]);
 
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
@@ -59,6 +56,7 @@ export function SeatComponent({ id, children }: SeatComponentProps) {
       style={{
         width, height, rotate: `${seatMetadata.location.rot}deg`,
         position: "absolute",
+        display: (seatMetadata.level === manager.currentLevel ? "block" : "none"),
         top: (seatMetadata.location.y - height/2),
         left: (seatMetadata.location.x - width/2),
       }}
@@ -71,27 +69,29 @@ export function SeatComponent({ id, children }: SeatComponentProps) {
   );
 }
 
-export function SeatingPlan() {
-  const context = React.useContext(SeatingPlanContext);
-  if (context === null) {
+export function SeatingPlan<T extends MType>({ context }: { context: React.Context<SeatingPlanContextType<T> | null> }) {
+  const contextValue = React.useContext(context);
+  if (contextValue === null) {
     return (
       <div>Loading...</div>
     );
   }
   
   return (
-    <div style={{ width: context.width, height: context.height }}>
+    <div style={{ width: contextValue.width, height: contextValue.height }}>
       <div
         style={{
-          width: context.stageLocation.x.length, height: context.stageLocation.y.length,
+          width: contextValue.stageLocation.x.length,
+          height: contextValue.stageLocation.y.length,
           position: "absolute",
-          top: context.stageLocation.y.start,
-          left: context.stageLocation.x.start,
+          top: contextValue.stageLocation.y.start,
+          left: contextValue.stageLocation.x.start,
         }}
       >
-        <context.StageContent />
+        <contextValue.StageContent />
       </div>
-      {Array.from(context.manager.seatMap.keys()).map(id => context.seatContentBuilder(id))}
+      {Array.from(contextValue.manager.seatMap.keys())
+        .map(id => <contextValue.SeatComponent key={id} id={id} />)}
     </div>
   );
 }
