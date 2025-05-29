@@ -24,7 +24,7 @@ export default function Page() {
               <input
                 name="email" type="email" disabled
                 value="your.example.email@example.domain.com"
-                className="w-full p-3 rounded-lg text-sm sm:text-md bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
+                className="w-full p-3 rounded-lg text-sm sm:text-base bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
               />
             </div>
             <div className="basis-1/3 space-y-2">
@@ -34,7 +34,7 @@ export default function Page() {
               <input
                 name="ticket-code" type="text" disabled
                 value="012345678"
-                className="w-full p-3 rounded-lg text-sm sm:text-md bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
+                className="w-full p-3 rounded-lg text-sm sm:text-base bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
               />
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function Page() {
             <p>Missing: 5 seats of Cat. A, 3 seats of Cat. B</p>
           </div>
           <RegularButton variant="black" sizeClass="w-full max-w-[480px] h-[48px] rounded-3xl" onClick={handleSelect}>
-            <span className="text-md sm:text-lg font-medium">Reserve seats</span>
+            <span className="text-base sm:text-lg font-medium">Reserve seats</span>
           </RegularButton>
         </div>
       </div>
