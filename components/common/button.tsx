@@ -32,15 +32,18 @@ export const RegularButton: React.FC<{
 }> = ({ variant, sizeClass, children, onClick }) => {
   // Only black variant for now
   return (
-    <button
-      className={`cursor-pointer relative bg-[#222222] group transition-all duration-300 active:scale-110 ${sizeClass}`}
-      onClick={onClick}
-    >
-      <span className="relative z-10 text-foreground">
-        {children}
-      </span>
-      <span className="absolute inset-0 overflow-hidden pointer-events-none bg-transparent group-hover:bg-white/10 duration-300" />
-    </button>
+    <div className="w-full h-full flex items-center justify-center p-2">
+      <button
+        className={`cursor-pointer relative bg-[#222222] ring-[#222222]/50 group transition-all duration-150 active:ring-8 ${sizeClass}`}
+        onClick={onClick}
+      >
+        <span className="relative z-10 text-foreground">
+          {children}
+        </span>
+        <span className="absolute inset-0 overflow-hidden pointer-events-none bg-transparent group-hover:bg-white/10 duration-300" />
+      </button>
+    </div>
+    
   );
 };
 
@@ -50,7 +53,7 @@ export const InlineButton: React.FC<{
 }> = ({ children, onClick }) => {
   return (
     <span
-      className="underline underline-offset-2 decoration-1 hover:decoration-2 hover:animate-pulse"
+      className="cursor-pointer underline underline-offset-2 decoration-1 hover:decoration-2 hover:animate-pulse"
       onClick={onClick}
     >
       {children}
