@@ -24,7 +24,7 @@ interface SeatComponentProps<T extends MType> {
 export function SeatWrapper<T extends MType>({ id, context, children }: SeatComponentProps<T>) {
   const contextValue = React.useContext(context);
   if (contextValue === null) {
-    return <></>;
+    return <></>;  // parent should show loading
   }
 
   const manager = contextValue.manager;
@@ -69,7 +69,7 @@ export function SeatWrapper<T extends MType>({ id, context, children }: SeatComp
   );
 }
 
-export function SeatingPlan<T extends MType>({ context }: { context: React.Context<SeatingPlanContextType<T> | null> }) {
+export function SeatingPlan<T extends MType>({ context, children }: { context: React.Context<SeatingPlanContextType<T> | null>, children: ReactNode }) {
   const contextValue = React.useContext(context);
   if (contextValue === null) {
     return (
@@ -92,6 +92,7 @@ export function SeatingPlan<T extends MType>({ context }: { context: React.Conte
       </div>
       {Array.from(contextValue.manager.seatMap.keys())
         .map(id => <contextValue.SeatComponent key={id} id={id} />)}
+      {children}
     </div>
   );
 }

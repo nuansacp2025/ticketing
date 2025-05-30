@@ -21,10 +21,10 @@ export interface SeatType {
     height: number,
   },
   themes: {
-    notSelectable: React.FC<{ children: ReactNode }>,
-    taken: React.FC<{ children: ReactNode }>,
-    selected: React.FC<{ children: ReactNode }>,
-    default: React.FC<{ children: ReactNode }>,
+    notSelectable: React.FC<{ children?: ReactNode }>,
+    taken: React.FC<{ children?: ReactNode }>,
+    selected: React.FC<{ children?: ReactNode }>,
+    default: React.FC<{ children?: ReactNode }>,
   },
 }
 
