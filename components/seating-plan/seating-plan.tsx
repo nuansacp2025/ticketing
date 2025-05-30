@@ -1,20 +1,5 @@
 import React, { ReactNode } from "react";
-import { BaseSeatingPlanManager as MType, SeatSelectionResult } from "./types";
-
-interface LevelMetadata {
-  levelSvgUrl: string,
-  levelMinimapImgUrl: string,
-}
-
-export interface SeatingPlanContextType<T extends MType> {
-  width: number,
-  height: number,
-  levels: Map<string, LevelMetadata>
-
-  manager: T,
-  seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
-  SeatComponent: React.FC<{ id: string }>,
-}
+import { BaseSeatingPlanManager as MType, SeatingPlanContextType, SeatSelectionResult } from "./types";
 
 interface SeatComponentProps<T extends MType> {
   id: string,
@@ -33,14 +18,13 @@ export function SeatWrapper<T extends MType>({ id, context, children }: SeatComp
 
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
+  const seatType = contextValue.seatTypes.get(seatMetadata.type)!
 
-  const { width, height } = seatMetadata.type.style;
-  
-  const themes = seatMetadata.type.themes;
-  const CurrentTheme = seatMetadata.notSelectable ? themes.notSelectable
-    : seatState.taken ? themes.taken
-    : seatState.selected ? themes.selected
-    : themes.default;
+  const { width, height } = seatType.style;
+  const CurrentTheme = seatMetadata.notSelectable ? seatType.themes.notSelectable
+    : seatState.taken ? seatType.themes.taken
+    : seatState.selected ? seatType.themes.selected
+    : seatType.themes.default;
   
   async function handleSeatClick() {
     if (seatMetadata.notSelectable || seatState.taken) return;

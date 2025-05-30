@@ -2,6 +2,7 @@ import { Mutex } from "@/lib/utils";
 import React, { ReactNode } from "react";
 
 export interface SeatMetadata {
+  label: string
   location: {
     x: number,
     y: number,
@@ -11,7 +12,7 @@ export interface SeatMetadata {
   level: string,
   leftId: string | null,
   rightId: string | null,
-  type: SeatType,
+  type: string,
 }
 
 export interface SeatType {
@@ -26,6 +27,12 @@ export interface SeatType {
     selected: React.FC<{ children?: ReactNode }>,
     default: React.FC<{ children?: ReactNode }>,
   },
+}
+
+export interface LevelMetadata {
+  label: string,
+  levelSvgUrl: string,
+  levelMinimapImgUrl: string,
 }
 
 export interface SeatState {
@@ -137,4 +144,15 @@ export class BaseSeatingPlanManager {
     this.currentLevel = level;
     this._updateContext();
   }
+}
+
+export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
+  width: number,
+  height: number,
+  levels: Map<string, LevelMetadata>
+  seatTypes: Map<string, SeatType>
+
+  manager: T,
+  seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
+  SeatComponent: React.FC<{ id: string }>,
 }

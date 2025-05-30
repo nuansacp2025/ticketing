@@ -7,8 +7,9 @@ import {
   MiniMap,
 } from "react-zoom-pan-pinch";
 import Image from "next/image";
-import { SeatingPlan, SeatingPlanContextType } from "../seating-plan";
+import { SeatingPlan } from "../seating-plan";
 import { CustomerSeatingPlanManager } from "./types";
+import { SeatingPlanContextType } from "../types";
 
 export type CustomerContextValue = SeatingPlanContextType<CustomerSeatingPlanManager> | null;
 
@@ -67,7 +68,7 @@ export function CustomerSeatingPlanInterface() {
         <div className="absolute top-6 right-6">
           <MiniMap width={240} className="rounded-sm outline-[#3E3E3E] outline-2">
             {levelEntries.map(([level, data]) => (
-              <Image key={level} fill src={data.levelMinimapImgUrl} alt={`Minimap (${level})`} className={`${currentLevel !== level && "hidden"}`} />
+              <Image key={level} fill src={data.levelMinimapImgUrl} alt={`Minimap (${data.label})`} className={`${currentLevel !== level && "hidden"}`} />
             ))}
           </MiniMap>
         </div>
@@ -82,7 +83,7 @@ export function CustomerSeatingPlanInterface() {
                 `}
                 onClick={() => contextValue.manager.setCurrentLevel(level)}
               >
-                <p>{level}</p>
+                <p>{data.label}</p>
               </div>
             ))}
           </div>

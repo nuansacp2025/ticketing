@@ -63,7 +63,7 @@ export default function Page() {
               <h3 className="text-xl font-semibold">Seat Category</h3>
               <div className="space-x-2 text-sm font-light">
                 <p>Cat. A: Level 1, Lines G-X</p>
-                <p>Cat. B: Level 2, Lines AA - GG and LL</p>
+                <p>Cat. B: Level 1, Lines AA-GG and LL</p>
                 <p>Cat. C: Level 2</p>
               </div>
             </div>

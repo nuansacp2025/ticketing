@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
-import { SeatState, SeatMetadata, SeatType } from "../types";
-import { SeatWrapper, SeatingPlanContextType } from "../seating-plan";
+import { SeatState, SeatMetadata, SeatType, SeatingPlanContextType } from "../types";
+import { SeatWrapper } from "../seating-plan";
 import { CustomerSeatingPlanManager } from "./types";
 import { CustomerSeatingPlanContext } from "./interface";
 
@@ -45,7 +45,7 @@ export const DefaultSeat = (props: { children?: ReactNode }) => {
   );
 };
 
-const mockSeatType: SeatType = {
+const regularSeatType: SeatType = {
   label: "Regular Seat",
   style: {
     width: 20,
@@ -62,48 +62,54 @@ const mockSeatType: SeatType = {
 const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).map(row => {
   return [
     ...Array.of(0,1,2,3).map(i => {
+      const level = (i > 1 ? "level-1" : "level-2");
       const id = `${String.fromCharCode(65+row)}${i}`;
-      return [id, {
+      return [level+"_"+id, {
+        label: id,
         location: {
           x: 100*i+100,
           y: 100*row+300,
           rot: 45,
         },
         notSelectable: (row < 5),
-        level: (i > 1 ? "Level 1" : "Level 2"),
+        level,
         leftId: (i == 0 || i == 2 ? null : `${String.fromCharCode(65+row)}${i-1}`),
         rightId: (i == 1 || i == 3 ? null : `${String.fromCharCode(65+row)}${i+1}`),
-        type: mockSeatType,
+        type: "regular",
       }] as [string, SeatMetadata];
     }),
     ...Array.of(0,1,2,3,4,5).map(i => {
+      const level = "level-1";
       const id = `${String.fromCharCode(65+row)}${i+4}`;
-      return [id, {
+      return [level+"_"+id, {
+        label: id,
         location: {
           x: 100*i+500,
           y: 100*row+300,
           rot: 0,
         },
         notSelectable: (row < 3),
-        level: "Level 1",
+        level,
         leftId: (i == 0 ? null : `${String.fromCharCode(65+row)}${i+5}`),
         rightId: (i == 5 ? null : `${String.fromCharCode(65+row)}${i+3}`),
-        type: mockSeatType,
+        type: "regular",
       }] as [string, SeatMetadata];
     }),
     ...Array.of(0,1,2,3).map(i => {
+      const level = (i < 2 ? "level-1" : "level-2");
       const id = `${String.fromCharCode(65+row)}${i+10}`;
-      return [id, {
+      return [level+"_"+id, {
+        label: id,
         location: {
           x: 100*i+1100,
           y: 100*row+300,
           rot: 315,
         },
         notSelectable: (row < 5),
-        level: (i < 2 ? "Level 1" : "Level 2"),
+        level,
         leftId: (i == 0 || i == 2 ? null : `${String.fromCharCode(65+row)}${i+9}`),
         rightId: (i == 1 || i == 3 ? null : `${String.fromCharCode(65+row)}${i+11}`),
-        type: mockSeatType,
+        type: "regular",
       }] as [string, SeatMetadata];
     }),
   ];
@@ -128,13 +134,13 @@ const MockSeatComponent = ({ id }: { id: string }) => {
   return (
     <SeatWrapper key={id} id={id} context={CustomerSeatingPlanContext}>
       <div className="relative w-full h-full flex items-center justify-center group">
-        {!seatMetadata.notSelectable && 
+        {!seatMetadata.notSelectable &&
           <span
             className={`
               text-xs text-background font-semibold
               ${!seatState.taken && "group-hover:scale-120 duration-200"}
             `}
-          >{id}</span>
+          >{seatMetadata.label}</span>
         }
         {true &&
           <span className="absolute -top-1.5 -right-1.5">
@@ -150,14 +156,20 @@ const MockSeatComponent = ({ id }: { id: string }) => {
 }
 
 const mockLevels = new Map([
-  ["Level 1", {
+  ["level-1", {
+    label: "Level 1",
     levelSvgUrl: "/mock-seating-plan/level-1.svg",
     levelMinimapImgUrl: "/mock-seating-plan/minimap-level-1.jpg",
   }],
-  ["Level 2", {
+  ["level-2", {
+    label: "Level 2",
     levelSvgUrl: "/mock-seating-plan/level-2.svg",
     levelMinimapImgUrl: "/mock-seating-plan/minimap-level-2.jpg",
   }],
+]);
+
+const mockSeatTypes = new Map([
+  ["regular", regularSeatType]
 ]);
 
 export function getMockSeatingPlanContextValue(setRerender: React.Dispatch<React.SetStateAction<number>>) {
@@ -165,8 +177,9 @@ export function getMockSeatingPlanContextValue(setRerender: React.Dispatch<React
     width: 1500,
     height: 2000,
     levels: mockLevels,
+    seatTypes: mockSeatTypes,
 
-    manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap, "Level 1", () => {setRerender(r => r+1)}),
+    manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap, "level-1", () => {setRerender(r => r+1)}),
     seatSelectionResultsHandler: results => {},
     SeatComponent: MockSeatComponent,
   } as SeatingPlanContextType<CustomerSeatingPlanManager>;
