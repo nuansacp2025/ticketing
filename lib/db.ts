@@ -225,4 +225,26 @@ export async function getSeats(): Promise<Seat[]> {
 
     return seats;
 }
-  
+
+export async function getSeatsMetadata(): Promise<SeatMetadata[]> {
+    const snap = await getDocs(collection(db, "seats"));
+    if (snap.empty) return [];
+    const seats: SeatMetadata[] = [];
+
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        seats.push({
+            id: docSnap.id,
+            label: data.label,
+            level: data.level,
+            category: data.category,
+            location: data.location,
+            notSelectable: data.notSelectable,
+            leftId: data.leftId,
+            rightId: data.rightId,
+        });
+    });
+
+    return seats;
+}
+
