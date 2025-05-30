@@ -56,6 +56,8 @@ export async function updateCheckedInStatus(ticketId: string) {
     await updateDoc(ticketRef, { checkedIn: true });
 }
 
+/* Deprecated -- client should use the Firestore SDK for real-time updates
+
 export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
   const snap = await getDocs(collection(db, "seats"));
   let seatsAvailability = new Map<String, boolean>();
@@ -68,6 +70,7 @@ export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
   console.log(seatsAvailability);
   return seatsAvailability;
 }
+*/
 
 export async function setSeatsReserved(ids: string[], ticketId: string) {
   await runTransaction(db, async (transaction) => {
