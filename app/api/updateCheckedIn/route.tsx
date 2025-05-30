@@ -20,6 +20,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ status: 200, error: "", seats: seats });
     } catch (error: any) {
         if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });
-        return NextResponse.json({ error: error.message }, { status: error.status });
+        return NextResponse.json({ error: "An unknown error occured" }, { status: 500 });
     }
 }

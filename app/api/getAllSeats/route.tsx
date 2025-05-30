@@ -17,6 +17,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(seats, { status: 200 });
     } catch (error: any) {
         if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });
-        return NextResponse.json({ error: error.message }, { status: error.status });
+        return NextResponse.json({ error: "An unknown error occured" }, { status: 500 });
     }
 }
