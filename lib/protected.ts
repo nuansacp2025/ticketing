@@ -8,6 +8,7 @@ import {
     runTransaction
 } from 'firebase/firestore';
 import { db } from "@/db/source";
+import { BadRequestError, ConflictError, NotFoundError } from "./error";
 export interface Profile {
     email: string,
     ticketCode: string,
@@ -18,46 +19,11 @@ export interface Profile {
     seatIds: string[],
 }
 
-export class HttpError extends Error {
-    constructor(public status: number, message: string) {
-        super(message);
-        this.name = "HttpError";
-    }
-
-    static badRequest(message = "Bad Request") {
-        return new HttpError(400, message);
-    }
-
-    static unauthorized(message = "Unauthorized") {
-        return new HttpError(401, message);
-    }
-
-    static forbidden(message = "Forbidden") {
-        return new HttpError(403, message);
-    }
-
-    static notFound(message = "Not Found") {
-        return new HttpError(404, message);
-    }
-
-    static conflict(message = "Conflict") {
-        return new HttpError(409, message);
-    }
-
-    static unprocessable(message = "Unprocessable Entity") {
-        return new HttpError(422, message);
-    }
-
-    static internal(message = "Internal Server Error") {
-        return new HttpError(500, message);
-    }
-}
-
 
 export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     const customer = await getCustomerByTicketId(ticketId);
-    if (customer == null || customer == undefined) {
-        throw HttpError.notFound("TicketId Not Found");
+    if (customer == null) {
+        throw new NotFoundError("TicketId Not Found");
     }
     const ticket = await getTicket(ticketId);
     if (customer === null || ticket === null) return null;
@@ -78,13 +44,13 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
 export async function updateCheckedInStatus(ticketId: string) {
     const ticket = await getTicket(ticketId);
     if (ticket == null) {
-        throw HttpError.notFound("Ticket not found");
+        throw new NotFoundError("Ticket not found");
     }
     if (ticket?.checkedIn) {
-        throw HttpError.conflict("Ticket already Checked In");
+        throw new ConflictError("Ticket already Checked In");
     }
     if (!ticket?.seatConfirmed) {
-        throw HttpError.badRequest("Seat need to be confirmed first");
+        throw new BadRequestError("Seat need to be confirmed first");
     }
     const ticketRef = doc(db, "tickets", ticketId);
     await updateDoc(ticketRef, { checkedIn: true });
@@ -117,10 +83,10 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
       const seatRef = doc(db, "seats", ids[i]);
       const seatDoc = await getDoc(seatRef);
       if (!ticketDoc.exists()) {
-        throw HttpError.notFound("Ticket(s) are not exist");
+        throw new NotFoundError("Ticket not found");
       }
       if (!seatDoc.exists() || (seatDoc.data().isAvailable == false && seatDoc.data().reservedBy != ticketId)) {
-        throw HttpError.conflict("Seat(s) are not available");
+        throw new ConflictError("Seat(s) are not available");
       } else if (seatDoc.data().isAvailable) {
         counts[seatDoc.data().category]++;
       }
