@@ -1,18 +1,19 @@
 import React, { ReactNode } from "react";
 import { BaseSeatingPlanManager as MType, SeatSelectionResult } from "./types";
 
+interface LevelMetadata {
+  levelSvgUrl: string,
+  levelMinimapImgUrl: string,
+}
+
 export interface SeatingPlanContextType<T extends MType> {
   width: number,
   height: number,
-  stageLocation: {
-    x: { start: number, length: number },
-    y: { start: number, length: number },
-  },
+  levels: Map<string, LevelMetadata>
 
   manager: T,
   seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
   SeatComponent: React.FC<{ id: string }>,
-  StageContent: React.FunctionComponent,
 }
 
 interface SeatComponentProps<T extends MType> {
@@ -79,17 +80,6 @@ export function SeatingPlan<T extends MType>({ context, children }: { context: R
   
   return (
     <div style={{ width: contextValue.width, height: contextValue.height }}>
-      <div
-        style={{
-          width: contextValue.stageLocation.x.length,
-          height: contextValue.stageLocation.y.length,
-          position: "absolute",
-          top: contextValue.stageLocation.y.start,
-          left: contextValue.stageLocation.x.start,
-        }}
-      >
-        <contextValue.StageContent />
-      </div>
       {Array.from(contextValue.manager.seatMap.keys())
         .map(id => <contextValue.SeatComponent key={id} id={id} />)}
       {children}

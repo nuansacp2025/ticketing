@@ -30,7 +30,6 @@ export default function Page() {
         <div className="flex w-[1100px] h-[600px]">
           <div className="w-[800px] h-full">
             <CustomerSeatingPlanInterface />
-            {/* controls here */}
           </div>
           <div className="m-4 w-full flex flex-col justify-between">
             <div className="space-y-4">

@@ -59,14 +59,6 @@ const mockSeatType: SeatType = {
   },
 }
 
-const MockStageContent = () => {
-  return (
-    <div className="w-full h-full flex justify-center items-center bg-gray-500 outline-black outline-4">
-      <p className="text-3xl"><b>STAGE</b></p>
-    </div>
-  );
-};
-
 const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).map(row => {
   return [
     ...Array.of(0,1,2,3).map(i => {
@@ -157,18 +149,25 @@ const MockSeatComponent = ({ id }: { id: string }) => {
   );
 }
 
+const mockLevels = new Map([
+  ["Level 1", {
+    levelSvgUrl: "/mock-seating-plan/level-1.svg",
+    levelMinimapImgUrl: "/mock-seating-plan/minimap-level-1.jpg",
+  }],
+  ["Level 2", {
+    levelSvgUrl: "/mock-seating-plan/level-2.svg",
+    levelMinimapImgUrl: "/mock-seating-plan/minimap-level-2.jpg",
+  }],
+]);
+
 export function getMockSeatingPlanContextValue(setRerender: React.Dispatch<React.SetStateAction<number>>) {
   return {
     width: 1500,
     height: 2000,
-    stageLocation: {
-      x: { start: 350, length: 800 },
-      y: { start: 50, length: 150 },
-    },
+    levels: mockLevels,
 
     manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap, "Level 1", () => {setRerender(r => r+1)}),
     seatSelectionResultsHandler: results => {},
     SeatComponent: MockSeatComponent,
-    StageContent: MockStageContent,
   } as SeatingPlanContextType<CustomerSeatingPlanManager>;
 }
