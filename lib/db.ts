@@ -29,9 +29,36 @@ export interface Ticket {
 
 export interface Seat {
     id: string,
+    label: string,
+    level: string,  // "level-1"/"level-2"
     isAvailable: boolean,
     reservedBy: string | null,
+    category: string,  // "catA"/"catB"/"catC"
+
+    // Below is metadata; only needed for UI
+    location?: {
+        x: number,
+        y: number,
+        rot: number,
+    }
+    notSelectable?: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
+    leftId?: string,
+    rightId?: string,
+}
+
+export interface SeatMetadata {
+    id: string,
+    label: string,
+    level: string,
     category: string,
+    location: {
+        x: number,
+        y: number,
+        rot: number,
+    }
+    notSelectable: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
+    leftId: string,
+    rightId: string,
 }
 
 export async function getCustomer(id: string): Promise<Customer | null> {
@@ -164,8 +191,11 @@ export async function getSeatsQuery(filters: {
     const seats: Seat[] = [];
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
+        if (data.notSelectable) return;
         seats.push({
             id: docSnap.id,
+            label: data.label,
+            level: data.level,
             isAvailable: data.isAvailable,
             reservedBy: data.reservedBy ?? null,
             category: data.category
@@ -182,8 +212,11 @@ export async function getSeats(): Promise<Seat[]> {
 
     snap.forEach(docSnap => {
         const data = docSnap.data();
+        if (data.notSelectable) return;
         seats.push({
             id: docSnap.id,
+            label: data.label,
+            level: data.level,
             isAvailable: data.isAvailable,
             reservedBy: data.reservedBy ?? null,
             category: data.category
