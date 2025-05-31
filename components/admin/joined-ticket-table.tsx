@@ -27,10 +27,12 @@ export const JoinedTicketTable: React.FC<{
         return {
             ticketId:      t.id,
             code:          t.code,
-            category:      t.category,
             seatConfirmed: t.seatConfirmed,
             checkedIn:     t.checkedIn,
             customerId:    owner?.id       ?? '',
+            catA:          t.catA,
+            catB:          t.catB,
+            catC:          t.catC,
         };
     }), [tickets, customers]);
 
@@ -38,10 +40,12 @@ export const JoinedTicketTable: React.FC<{
     const columnDefs: ColDef[] = [
         { field: 'ticketId',      headerName: 'Ticket ID' },
         { field: 'code',          headerName: 'Code' },
-        { field: 'category',      headerName: 'Category' },
         { field: 'seatConfirmed', headerName: 'Seat Confirmed' },
         { field: 'checkedIn',     headerName: 'Checked In' },
         { field: 'customerId',    headerName: 'Customer ID' },
+        { field: 'catA',          headerName: 'Category A' },
+        { field: 'catB',          headerName: 'Category B' },
+        { field: 'catC',          headerName: 'Category C' },
     ];
 
     const defaultColDef: ColDef = {

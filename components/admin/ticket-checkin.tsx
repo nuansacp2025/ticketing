@@ -1,18 +1,5 @@
 import React, { useState } from 'react';
 
-interface Seat {
-  id: string;
-  isAvailable: boolean;
-  reservedBy: string | null;
-}
-interface Ticket {
-  id: string;
-  code: string;
-  category: string;
-  seatConfirmed: boolean;
-  checkedIn: boolean;
-}
-
 export const TicketCheckIn = () => {
   const [ticketId, setTicketId] = useState('');
   const [checkedInTicketId, setCheckedInTicketId] = useState<string | null>(null);
