@@ -15,33 +15,6 @@ export type CustomerContextValue = SeatingPlanContextType<CustomerSeatingPlanMan
 
 export const CustomerSeatingPlanContext = React.createContext<CustomerContextValue>(null);
 
-export default function SelectionChip({ id }: { id: string }) {
-  const contextValue = React.useContext(CustomerSeatingPlanContext);
-  if (contextValue === null) {
-    return <></>;  // parent should show loading
-  }
-
-  const manager = contextValue.manager;
-
-  function handleZoomIntoSeat() {
-    // TODO
-  }
-
-  async function handleUnselectSeat() {
-    // TODO
-  }
-
-  return (
-    <div className="flex justify-between items-center">
-      <p className="text-foreground">{id}</p>
-      <div className="flex items-center">
-        <div onClick={handleZoomIntoSeat}></div>
-        <div onClick={handleUnselectSeat}></div>
-      </div>
-    </div>
-  );
-}
-
 export function CustomerSeatingPlanInterface() {
   const contextValue = React.useContext(CustomerSeatingPlanContext);
   if (contextValue === null) {
