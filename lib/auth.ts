@@ -41,5 +41,8 @@ export function verify(token: string): { ticketId: string } {
 
 export async function verifyAdmin(token: string) {
   const decodedToken = await getAuth(adminApp).verifyIdToken(token);
+    if (!decodedToken.admin) throw { status: 403, message: "Not an Admin" };
+
+
   return decodedToken;
 }

@@ -38,4 +38,4 @@ export async function GET(request: NextRequest) {
     } catch (e) {
       return NextResponse.json({ loggedIn: false }, { status: 401 });
     }
-  }
+}

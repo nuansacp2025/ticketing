@@ -16,9 +16,16 @@ export class ForbiddenError extends ApiError {
 }
 
 export class NotFoundError extends ApiError {
-    constructor(resource = 'Resource') {
-        super(`${resource} not found`, 404);
+    constructor(message = 'Resource not found') {
+        super(message, 404);
         Object.setPrototypeOf(this, NotFoundError.prototype);
+    }
+}
+
+export class BadRequestError extends ApiError {
+    constructor(message: string) {
+        super(message, 400);
+        Object.setPrototypeOf(this, BadRequestError.prototype);
     }
 }
 
