@@ -3,19 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "next-dev": "next dev --turbopack",
+    "flask-dev": "pip3 install -r requirements.txt && python3 api/index.py",
+    "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
+    "ag-grid-community": "^33.3.0",
+    "ag-grid-react": "^33.3.0",
+    "chart.js": "^4.4.9",
     "firebase": "^11.7.3",
     "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
     "next": "15.3.2",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
+    "recharts": "^2.15.3",
     "react-zoom-pan-pinch": "^3.7.0"
   },
   "devDependencies": {
@@ -24,6 +31,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.1.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
