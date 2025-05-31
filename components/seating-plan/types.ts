@@ -41,10 +41,9 @@ export interface SeatState {
   taken: boolean
 }
 
-export interface SeatSelectionResult {
-  seatId: string,
-  success: boolean,
-  failureReason: string,
+export interface SeatSelectionWarning {
+  id: string,
+  type: string,
 }
 
 export class BaseSeatingPlanManager {
@@ -85,60 +84,80 @@ export class BaseSeatingPlanManager {
     this._updateContext = updateContextCallback ?? (() => {});
   }
 
-  checkSeatSelectionValidity(newSeatIds: string[]): SeatSelectionResult[] {
+  auditSeatSelection(newSeatIds?: string[]): SeatSelectionWarning[] {
+    // This method is triggered after every operation that can potentially invalidate
+    // the selection. It should unselect seats which require immediate fixing, and
+    // return warnings for problematic seats (a seat that either was unselected or
+    // is related to a violation of some business logic).
+
+    // `newSeatIds` contain the seats that are newly selected since the last audit.
+    // When it is provided, if unselecting seats is necessary, the method should
+    // prioritize unselecting these seats where possible.
+
+    // The method should return an empty array if and only if the selection is valid
+    // for reservation at that point in time.
     throw new Error("This method should be implemented in the subclass")
   }
 
-  async updateTakenStatus(takenStatusMap: Map<string, boolean>): Promise<void> {
-    throw new Error("This method should be implemented in the subclass")
+  async updateTakenStatus(takenStatusMap: Map<string, boolean>): Promise<SeatSelectionWarning[]> {
+    // Assumes `takenStatusMap` keys are valid
+    return await this._seatStateMapMutex.withLock(() => {
+      takenStatusMap.forEach((taken, id) => {
+        this.seatStateMap.get(id)!.taken = taken;
+      })
+      const warnings = this.auditSeatSelection();
+
+      this._updateContext();
+      return warnings;
+    });
   }
 
   async getSelection(): Promise<string[]> {
+    // Ensures selection is not retrieved in between potentially invalidating operations.
     return await this._seatStateMapMutex.withLock(() => {
       return Array.from(this.selection);
     });
   }
 
-  async selectSeat(seatId: string): Promise<SeatSelectionResult> {
-    return (await this.selectSeats([seatId]))[0];
+  async selectSeat(seatId: string): Promise<SeatSelectionWarning[]> {
+    return await this.selectSeats([seatId]);
   }
 
-  async selectSeats(seatIds: string[]): Promise<SeatSelectionResult[]> {
-    if (seatIds.filter((id, _) => !this._seatIds.has(id)).length > 0) {
-      throw new Error("Seat not found")
-    }
+  async selectSeats(seatIds: string[]): Promise<SeatSelectionWarning[]> {
+    // Assumes `seatIds` is valid
     return await this._seatStateMapMutex.withLock(() => {
-      const results = this.checkSeatSelectionValidity(seatIds);
-      results.forEach(({ seatId, success }) => {
-        if (success) {
-          this.seatStateMap.get(seatId)!.selected = true;
-          this.selection.push(seatId);
-        }
+      const warnings: SeatSelectionWarning[] = [];
+      seatIds.forEach(seatId => {
+        this.seatStateMap.get(seatId)!.selected = true;
+        this.selection.push(seatId);
       });
+      warnings.push(...this.auditSeatSelection(seatIds));
+
       this._updateContext();
-      return results;
+      return warnings;
     });
   }
 
-  async unselectSeat(seatId: string): Promise<void> {
-    await this.unselectSeats([seatId]);
+  async unselectSeat(seatId: string): Promise<SeatSelectionWarning[]> {
+    return await this.unselectSeats([seatId]);
   }
 
-  async unselectSeats(seatIds: string[]): Promise<void> {
-    if (seatIds.filter(id => !this._seatIds.has(id)).length > 0) {
-      throw new Error("Seat not found")
-    }
+  async unselectSeats(seatIds: string[]): Promise<SeatSelectionWarning[]> {
+    // Assumes `seatIds` is valid
     return await this._seatStateMapMutex.withLock(() => {
       seatIds.forEach(id => {
         this.seatStateMap.get(id)!.selected = false;
       });
       this.selection = this.selection.filter(id => !seatIds.includes(id));
+      const warnings = this.auditSeatSelection()
+
       this._updateContext();
+      return warnings;
     });
   }
 
-  async unselectAllSeats(): Promise<void> {
-    await this.unselectSeats(Array.from(this.seatMap.keys()));
+  async unselectAllSeats(): Promise<SeatSelectionWarning[]> {
+    return await this.unselectSeats(Array.from(this.seatMap.keys()));
   }
 
   setCurrentLevel(level: string) {
@@ -154,6 +173,6 @@ export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
   categories: Map<string, CategoryMetadata>
 
   manager: T,
-  seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,
+  seatSelectionWarningsHandler: (warnings: SeatSelectionWarning[]) => Promise<void> | void,
   SeatComponent: React.FC<{ id: string }>,
 }

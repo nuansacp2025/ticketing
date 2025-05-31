@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { BaseSeatingPlanManager as MType, SeatingPlanContextType, SeatSelectionResult } from "./types";
+import { BaseSeatingPlanManager as MType, SeatingPlanContextType, SeatSelectionWarning } from "./types";
 
 interface SeatComponentProps<T extends MType> {
   id: string,
@@ -14,7 +14,7 @@ export function SeatWrapper<T extends MType>({ id, context, children }: SeatComp
   }
 
   const manager = contextValue.manager;
-  const resultHandler = (result: SeatSelectionResult) => contextValue.seatSelectionResultsHandler([result]);
+  const warningHandler = (warnings: SeatSelectionWarning[]) => contextValue.seatSelectionWarningsHandler(warnings);
 
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
@@ -31,8 +31,8 @@ export function SeatWrapper<T extends MType>({ id, context, children }: SeatComp
     if (seatState.selected) {
       await manager.unselectSeat(id);
     } else {
-      const result = await manager.selectSeat(id);
-      await resultHandler(result);
+      const warnings = await manager.selectSeat(id);
+      await warningHandler(warnings);
     }
   }
   

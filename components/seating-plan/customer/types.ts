@@ -1,65 +1,45 @@
-import { BaseSeatingPlanManager, SeatMetadata, SeatSelectionResult, SeatState } from "../types";
+import { BaseSeatingPlanManager, SeatMetadata, SeatSelectionWarning, SeatState } from "../types";
 
 export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
-  lastOperation: any
-  isolatedSeatIds: Set<string>
-  
+  isolatedSeatIds: string[]
+
   constructor(
     seatMap: ReadonlyMap<string, SeatMetadata>,
     initialSeatStateMap: ReadonlyMap<string, SeatState>,
     defaultLevel: string,
     updateContextCallback?: () => void,
   ) {
-    super(seatMap, initialSeatStateMap, defaultLevel);
-    this.lastOperation = undefined;  // TODO: at this point should be "init" operation
-    this.isolatedSeatIds = new Set();
-    this.updateIsolatedSeatIdsFromLastOperation();
-
-    if (updateContextCallback) {
-      this._updateContext = () => {
-        this.updateIsolatedSeatIdsFromLastOperation();
-        updateContextCallback();
-      }
-    }
+    super(seatMap, initialSeatStateMap, defaultLevel, updateContextCallback);
+    this.isolatedSeatIds = [];
+    this.auditSeatSelection();
   }
 
-  updateIsolatedSeatIdsFromLastOperation() {
-    return;  // TODO: update from operation "init"/"select"/"unselect"/"taken"/"released"
-  }
+  auditSeatSelection(newSeatIds?: string[]): SeatSelectionWarning[] {
+    const warnings: SeatSelectionWarning[] = [];
 
-  checkSeatSelectionValidity(newSeatIds: string[]): SeatSelectionResult[] {
-    // TODO: Add logic for ticket category and certain seat types (e.g. wheelchair)
-    const results: SeatSelectionResult[] = [];
-    newSeatIds.forEach(id => {
-      const res = {
-        seatId: id,
-        success: false,
-        failureReason: "",
+    this.selection = this.selection.filter(id => {
+      const state = this.seatStateMap.get(id)!;
+      if (state.taken) {
+        state.selected = false;
+        warnings.push({ id, type: "SEAT_TAKEN" });
+        return false;
       }
-      if (this.selection.includes(id)) {
-        res.failureReason = "Seat is already taken";
-      } else {
-        res.success = true;
-      }
-      results.push(res);
+      return true;
     });
-    return results;
-  }
 
-  async updateTakenStatus(takenStatusMap: Map<string, boolean>): Promise<void> {
-    if (Array.from(takenStatusMap.entries()).filter(([id, _]) => !this._seatIds.has(id)).length > 0) {
-      throw new Error("Seat not found");
-    }
-    await this._seatStateMapMutex.withLock(() => {
-      takenStatusMap.forEach((taken, id) => {
-        const state = this.seatStateMap.get(id)!;
-        if (taken && state.selected) {
-          // Send signal to notifications
-          state.selected = false;
-        }
-        state.taken = taken;
-      })
-      this._updateContext();
-    })
+    // TODO: implement logic for MAX_CAT_LIMIT_EXCEEDED
+
+    const selectedOrTaken = (state: SeatState) => state.selected || state.taken;
+    this.isolatedSeatIds = Array.from(this.seatMap.entries()).filter(([id, data]) => {
+      if (selectedOrTaken(this.seatStateMap.get(id)!)) return false;
+      const left = (data.leftId === null) || selectedOrTaken(this.seatStateMap.get(data.leftId)!)
+      const right = (data.rightId === null) || selectedOrTaken(this.seatStateMap.get(data.rightId)!)
+      return (data.leftId !== null || data.rightId !== null) && left && right;
+    }).map(([id, _]) => {
+      // warnings.push({ id, type: "SEAT_ISOLATED" });
+      return id;
+    });
+
+    return warnings;
   }
 }
