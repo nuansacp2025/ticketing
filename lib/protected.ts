@@ -47,7 +47,7 @@ export async function updateCheckedInStatus(ticketId: string) {
         throw new NotFoundError("Ticket not found");
     }
     if (ticket?.checkedIn) {
-        throw new ConflictError("Ticket already Checked In");
+        throw new ConflictError("Ticket already checked In");
     }
     if (!ticket?.seatConfirmed) {
         throw new BadRequestError("Seat need to be confirmed first");

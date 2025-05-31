@@ -26,9 +26,11 @@ export const TicketTable: React.FC<{ tickets: Ticket[] }> = ({ tickets }) => {
   const columnDefs: ColDef[] = [
     { field: 'id', headerName: 'Ticket ID' },
     { field: 'code', headerName: 'Code' },
-    { field: 'category', headerName: 'Category' },
     { field: 'seatConfirmed', headerName: 'Seat Confirmed' },
     { field: 'checkedIn', headerName: 'Checked In' },
+    { field: 'catA', headerName: 'Category A' },
+    { field: 'catB', headerName: 'Category B' },
+    { field: 'catC', headerName: 'Category C' },
   ];
 
   return (

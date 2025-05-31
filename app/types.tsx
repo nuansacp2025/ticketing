@@ -7,9 +7,11 @@ interface Customer {
 interface Ticket {
     id: string;
     code: string;
-    category: string;
     seatConfirmed: boolean;
     checkedIn: boolean;
+    catA: number;
+    catB: number;
+    catC: number;
 }
 
 interface Seat {
