@@ -2,6 +2,8 @@
 
 import { CustomerContextValue, CustomerSeatingPlanContext, CustomerSeatingPlanInterface } from "@/components/seating-plan/customer/interface";
 import { DefaultSeat, getMockSeatingPlanContextValue, NotSelectableSeat, SelectedSeat, TakenSeat } from "@/components/seating-plan/customer/mock-types";
+import { db } from "@/db/source";
+import { collection, onSnapshot, query } from "firebase/firestore";
 import React from "react";
 
 export default function Page() {
@@ -15,6 +17,21 @@ export default function Page() {
     // Check cookies to retrieve selection from last session
     setContextValue(getMockSeatingPlanContextValue(() => setRerender(t => t+1)))
   }, []);
+
+  React.useEffect(() => {
+    if (contextValue === null) return;
+    const q = query(collection(db, "seats"));
+    const unsub = onSnapshot(q, async (querySnapshot) => {
+      const updates = new Map();
+      querySnapshot.forEach((doc) => {
+        // For the purposes of this demo, we only consider seats with id "level-1_D[11-30]"
+        if (!(doc.id.startsWith("level-1_D"))) return;
+        updates.set(doc.id, !doc.data().isAvailable);
+      });
+      const warnings = await contextValue.manager.updateTakenStatus(updates);
+      contextValue.seatSelectionWarningsHandler(warnings);
+    });
+  }, [contextValue])
 
   if (contextValue === null) {
     return (
