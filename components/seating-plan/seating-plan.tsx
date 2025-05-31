@@ -18,13 +18,13 @@ export function SeatWrapper<T extends MType>({ id, context, children }: SeatComp
 
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
-  const seatType = contextValue.seatTypes.get(seatMetadata.type)!
+  const seatCategory = contextValue.categories.get(seatMetadata.category)!
 
-  const { width, height } = seatType.style;
-  const CurrentTheme = seatMetadata.notSelectable ? seatType.themes.notSelectable
-    : seatState.taken ? seatType.themes.taken
-    : seatState.selected ? seatType.themes.selected
-    : seatType.themes.default;
+  const { width, height } = seatCategory.style;
+  const CurrentTheme = seatMetadata.notSelectable ? seatCategory.themes.notSelectable
+    : seatState.taken ? seatCategory.themes.taken
+    : seatState.selected ? seatCategory.themes.selected
+    : seatCategory.themes.default;
   
   async function handleSeatClick() {
     if (seatMetadata.notSelectable || seatState.taken) return;

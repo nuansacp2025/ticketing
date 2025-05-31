@@ -10,13 +10,14 @@ export interface SeatMetadata {
   },
   notSelectable: boolean,
   level: string,
+  category: string,
   leftId: string | null,
   rightId: string | null,
-  type: string,
 }
 
-export interface SeatType {
+export interface CategoryMetadata {
   label: string,
+  description: string,
   style: {
     width: number,
     height: number,
@@ -150,7 +151,7 @@ export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
   width: number,
   height: number,
   levels: Map<string, LevelMetadata>
-  seatTypes: Map<string, SeatType>
+  categories: Map<string, CategoryMetadata>
 
   manager: T,
   seatSelectionResultsHandler: (results: SeatSelectionResult[]) => Promise<void> | void,

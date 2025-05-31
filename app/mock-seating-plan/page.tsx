@@ -25,10 +25,11 @@ export default function Page() {
   }
 
   const levelEntries = Array.from(contextValue.levels.entries());
+  const categoryEntries = Array.from(contextValue.categories.entries());
 
   const selectionData = contextValue.manager.selection
     .map(id => contextValue.manager.seatMap.get(id)!)
-    .map(data => ({ category: data.type, level: data.level, label: data.label }));
+    .map(data => ({ category: data.category, level: data.level, label: data.label }));
 
   return (
     <CustomerSeatingPlanContext.Provider value={contextValue}>
@@ -82,12 +83,12 @@ export default function Page() {
               <div className="relative flex-1 outline-1 outline-[#ededed] rounded-sm flex flex-col">
                 <div className="absolute inset-2 space-y-2 text-sm text-[#0a0a0a] overflow-auto">
                   <p className="text-[#ededed]">{selectionData.length ? `${selectionData.length} of ? selected.` : "None selected."}</p>
-                  {["catA", "catB", "catC"].map(cat => {
+                  {categoryEntries.map(([cat, data]) => {
                     const catSelection = selectionData.filter(data => data.category === cat);
                     if (catSelection.length === 0) return;
                     return (
                       <div className="w-full p-2 rounded-xl bg-[#ededed]">
-                        <p className="mb-1 font-semibold">Cat. {cat.charAt(3)}:</p>
+                        <p className="mb-1 font-semibold">{data.label}:</p>
                         <div className="ml-2">
                           {levelEntries.map(([level, data]) => {
                             const catAndLevelSelection = catSelection.filter(data => data.level === level);

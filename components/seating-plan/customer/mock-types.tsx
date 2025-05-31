@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { SeatState, SeatMetadata, SeatType, SeatingPlanContextType } from "../types";
+import { SeatState, SeatMetadata, SeatingPlanContextType, CategoryMetadata } from "../types";
 import { SeatWrapper } from "../seating-plan";
 import { CustomerSeatingPlanManager } from "./types";
 import { CustomerSeatingPlanContext } from "./interface";
@@ -45,8 +45,7 @@ export const DefaultSeat = (props: { children?: ReactNode }) => {
   );
 };
 
-const regularSeatType: SeatType = {
-  label: "Regular Seat",
+const mockCategoryMetadata = {
   style: {
     width: 20,
     height: 20,
@@ -57,7 +56,34 @@ const regularSeatType: SeatType = {
     selected: SelectedSeat,
     default: DefaultSeat,
   },
-}
+};
+
+const catA: CategoryMetadata = {
+  label: "Cat. A",
+  description: "Level 1, Lines G-X",
+  style: mockCategoryMetadata.style,
+  themes: mockCategoryMetadata.themes,
+};
+
+const catB: CategoryMetadata = {
+  label: "Cat. B",
+  description: "Level 1, Lines AA-GG and LL",
+  style: mockCategoryMetadata.style,
+  themes: mockCategoryMetadata.themes,
+};
+
+const catC: CategoryMetadata = {
+  label: "Cat. C",
+  description: "Level 2",
+  style: mockCategoryMetadata.style,
+  themes: mockCategoryMetadata.themes,
+};
+
+const mockCategories = new Map([
+  ["catA", catA],
+  ["catB", catB],
+  ["catC", catC],
+]);
 
 const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).map(row => {
   return [
@@ -75,7 +101,7 @@ const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,1
         level,
         leftId: (i == 0 || i == 2 ? null : `${String.fromCharCode(65+row)}${i-1}`),
         rightId: (i == 1 || i == 3 ? null : `${String.fromCharCode(65+row)}${i+1}`),
-        type: "regular",
+        category: "catA",
       }] as [string, SeatMetadata];
     }),
     ...Array.of(0,1,2,3,4,5).map(i => {
@@ -92,7 +118,7 @@ const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,1
         level,
         leftId: (i == 0 ? null : `${String.fromCharCode(65+row)}${i+5}`),
         rightId: (i == 5 ? null : `${String.fromCharCode(65+row)}${i+3}`),
-        type: "regular",
+        category: "catB",
       }] as [string, SeatMetadata];
     }),
     ...Array.of(0,1,2,3).map(i => {
@@ -109,7 +135,7 @@ const mockSeatMap = new Map<string, SeatMetadata>(Array.of(0,1,2,3,4,5,6,7,8,9,1
         level,
         leftId: (i == 0 || i == 2 ? null : `${String.fromCharCode(65+row)}${i+9}`),
         rightId: (i == 1 || i == 3 ? null : `${String.fromCharCode(65+row)}${i+11}`),
-        type: "regular",
+        category: "catC",
       }] as [string, SeatMetadata];
     }),
   ];
@@ -168,16 +194,12 @@ const mockLevels = new Map([
   }],
 ]);
 
-const mockSeatTypes = new Map([
-  ["regular", regularSeatType]
-]);
-
 export function getMockSeatingPlanContextValue(setRerender: React.Dispatch<React.SetStateAction<number>>) {
   return {
     width: 1500,
     height: 2000,
     levels: mockLevels,
-    seatTypes: mockSeatTypes,
+    categories: mockCategories,
 
     manager: new CustomerSeatingPlanManager(mockSeatMap, mockSeatStateMap, "level-1", () => {setRerender(r => r+1)}),
     seatSelectionResultsHandler: results => {},
