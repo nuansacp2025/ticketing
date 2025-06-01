@@ -1,11 +1,16 @@
 "use client"
 
 import { InlineButton, RegularButton } from "@/components/common/button";
+import { Profile } from "@/lib/protected";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function Page() {
+  const router = useRouter();
+
   const [seatView, setSeatView] = React.useState(false);
+  const [profile, setProfile] = React.useState<Profile | null>(null)
 
   const openSeatView = () => { setSeatView(true) };
   const closeSeatView = () => { setSeatView(false) };
@@ -13,6 +18,42 @@ export default function Page() {
   function handleLogout() {
     // TODO
   }
+
+  React.useEffect(() => {
+    fetch("/api/getMyProfile", {
+      method: "GET",
+    }).then(res => {
+      if (res.ok) {
+        return res.json();
+      } else if (res.status === 401) {
+        router.push("/login");
+        return null;
+      }
+      // TODO: error handling
+      else throw new Error(`Error status ${res.status}`);
+    }).then((data: Profile) => {
+      setProfile(data);
+    }).catch(err => {
+      
+    })
+  }, []);
+
+  if (profile === null) {
+    // TODO
+    return (
+      <div>
+        <p>Loading... (loading page WIP)</p>
+      </div>
+    )
+  }
+
+  const categories = new Map<string, [string, number]>([
+    ["catA", ["Cat. A (Level 1)", profile.catA]],
+    ["catB", ["Cat. B (Level 1)", profile.catB]],
+    ["catC", ["Cat. C (Level 2)", profile.catC]],
+  ]);
+  const seats = new Map<string, string[]>(Array.from(categories.keys()).map(cat =>
+    [cat, profile.seats.filter(({ category }) => category === cat).map(seat => seat.label)]));
 
   return (
     <>
@@ -26,7 +67,7 @@ export default function Page() {
                 </label>
                 <input
                   name="email" type="email" disabled
-                  value="your.example.email@example.domain.com"
+                  value={profile.email}
                   className="w-full p-3 rounded-lg text-sm sm:text-base bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
                 />
               </div>
@@ -36,7 +77,7 @@ export default function Page() {
                 </label>
                 <input
                   name="ticket-code" type="text" disabled
-                  value="012345678"
+                  value={profile.ticketCode}
                   className="w-full p-3 rounded-lg text-sm sm:text-base bg-[#CCCCCC] ring-2 ring-[#3E3E3E] text-[#3E3E3E]"
                 />
               </div>
@@ -49,25 +90,23 @@ export default function Page() {
               {" "}first.
             </p>
           </div>
-          {true ?  // mock value for seatConfirmed
+          {profile.seatConfirmed ?  // mock value for seatConfirmed
             <>
               <div className="px-0.5 w-full space-y-2">
                 <p className="text-xs sm:text-sm font-semibold">
                   Confirmed Seats
                 </p>
                 <div className="w-full p-2 space-y-2 text-background outline-2 outline-background rounded-sm">
-                  <p className="text-sm sm:text-base">
-                    <span className="font-semibold">Cat. A (Level 1): </span>
-                    A1, A2, A3
-                  </p>
-                  <p className="text-sm sm:text-base">
-                    <span className="font-semibold">Cat. B (Level 1): </span>
-                    B1, B2, B3
-                  </p>
-                  <p className="text-sm sm:text-base">
-                    <span className="font-semibold">Cat. C (Level 2): </span>
-                    C1, C2, C3
-                  </p>
+                  {Array.from(categories.entries()).map(([key, [label, _]]) => {
+                    const seatList = seats.get(key) || [];
+                    if (seatList.length === 0) return null;
+                    return (
+                      <p key={key} className="text-sm sm:text-base">
+                        <span className="font-semibold">{label}: </span>
+                        {seatList.join(", ")}
+                      </p>
+                    );
+                  })}
                 </div>
                 <p className="text-xs sm:text-sm font-light">
                   <InlineButton onClick={openSeatView}>
@@ -96,7 +135,12 @@ export default function Page() {
               <div className="w-full flex flex-col items-center space-y-4 text-center">
                 <div className="sm:px-4 flex flex-col items-center space-y-1 text-sm sm:text-base font-light">
                   <p>You have not completed the seat selection process.</p>
-                  <p>Missing: 5 seats of Cat. A (Level 1), 3 seats of Cat. B (Level 1)</p>
+                  <p>
+                    Missing:{" "}
+                    {Array.from(categories.entries())
+                      .filter(([key, [Label, count]]) => count > 0)
+                      .map(([key, [label, count]]) => `${count} seats of ${label}`)}
+                  </p>
                 </div>
                 <Link href="/ticket/select" className="w-full">
                   <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">

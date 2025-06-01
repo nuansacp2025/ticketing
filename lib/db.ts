@@ -20,9 +20,9 @@ export interface Customer {
 export interface Ticket {
     id: string,
     code: string,
-    catA: Number,
-    catB: Number,
-    catC: Number,
+    catA: number,
+    catB: number,
+    catC: number,
     seatConfirmed: boolean,
     checkedIn: boolean
 }

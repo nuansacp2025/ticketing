@@ -1,4 +1,4 @@
-import { getCustomerByTicketId, getSeats, getTicket } from "./db";
+import { getCustomerByTicketId, getSeats, getTicket, SeatMetadata } from "./db";
 import {
     collection,
     getDocs,
@@ -12,11 +12,11 @@ import { BadRequestError, ConflictError, NotFoundError } from "./error";
 export interface Profile {
     email: string,
     ticketCode: string,
-    catA: Number,
-    catB: Number,
-    catC: Number,
+    catA: number,
+    catB: number,
+    catC: number,
     seatConfirmed: boolean,
-    seatIds: string[],
+    seats: SeatMetadata[],
 }
 
 
@@ -29,7 +29,7 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     if (customer === null || ticket === null) return null;
     const mySeats = Array.from((await getSeats()).entries())
         .filter(([id, seat], _) => seat.reservedBy === ticketId)
-        .map(([id, seat], _) => seat.id);
+        .map(([id, seat], _) => seat as SeatMetadata);
     return {
         email: customer.email,
         ticketCode: ticket.code,
@@ -37,7 +37,7 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
         catB: ticket.catB,
         catC: ticket.catC,
         seatConfirmed: ticket.seatConfirmed,
-        seatIds: mySeats,
+        seats: mySeats,
     };
 }
 
