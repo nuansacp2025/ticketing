@@ -26,16 +26,22 @@ export const FancyButton: React.FC<{
 
 export const RegularButton: React.FC<{
   variant: "black",
-  sizeClass: string,
+  buttonClass: string,
+  buttonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>,
   children: ReactNode,
   onClick?: () => void,
-}> = ({ variant, sizeClass, children, onClick }) => {
+}> = ({ variant, buttonClass, children, onClick, buttonProps }) => {
   // Only black variant for now
   return (
     <div className="w-full h-full flex items-center justify-center p-2">
       <button
-        className={`cursor-pointer relative bg-[#222222] ring-[#222222]/50 group transition-all duration-150 active:ring-8 ${sizeClass}`}
+        className={`
+          relative bg-[#222222] ring-[#222222]/50 group transition-all duration-150
+          ${buttonProps?.disabled ? "cursor-progress" : "cursor-pointer active:ring-8"}
+          ${buttonClass}
+        `}
         onClick={onClick}
+        {...buttonProps}
       >
         <span className="relative z-10 text-foreground">
           {children}
@@ -43,7 +49,6 @@ export const RegularButton: React.FC<{
         <span className="absolute inset-0 overflow-hidden pointer-events-none bg-transparent group-hover:bg-white/10 duration-300" />
       </button>
     </div>
-    
   );
 };
 

@@ -62,7 +62,7 @@ export default function Page() {
             <p>You have not completed the seat selection process.</p>
             <p>Missing: 5 seats of Cat. A, 3 seats of Cat. B</p>
           </div>
-          <RegularButton variant="black" sizeClass="w-full max-w-[480px] h-[48px] rounded-3xl" onClick={handleSelect}>
+          <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl" onClick={handleSelect}>
             <span className="text-base sm:text-lg font-medium">Reserve seats</span>
           </RegularButton>
         </div>
