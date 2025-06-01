@@ -1,8 +1,9 @@
+import { Seat } from '@/lib/db';
 import React, { useState } from 'react';
 
 export const TicketCheckIn = () => {
-  const [ticketId, setTicketId] = useState('');
-  const [checkedInTicketId, setCheckedInTicketId] = useState<string | null>(null);
+  const [ticketCode, setTicketCode] = useState('');
+  const [checkedInTicketCode, setCheckedInTicketCode] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [relatedSeats, setRelatedSeats] = useState<Seat[]>([]);
 
@@ -15,13 +16,13 @@ export const TicketCheckIn = () => {
       const res = await fetch('/api/updateCheckedIn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticketId }),
+        body: JSON.stringify({ ticketCode }),
       });
       const payload = await res.json();
   
       if (res.ok) {
-        setCheckedInTicketId(ticketId);
-        setStatusMessage(`✅ Ticket ${ticketId} checked in`);
+        setCheckedInTicketCode(ticketCode);
+        setStatusMessage(`✅ Ticket ${ticketCode} checked in`);
         setRelatedSeats(payload.seats);
       } else {
         switch (res.status) {
@@ -57,9 +58,9 @@ export const TicketCheckIn = () => {
       <form onSubmit={handleCheckIn} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '1rem' }}>
         <input
           type="text"
-          placeholder="Ticket ID"
-          value={ticketId}
-          onChange={e => setTicketId(e.target.value)}
+          placeholder="Ticket Code"
+          value={ticketCode}
+          onChange={e => setTicketCode(e.target.value)}
           style={{
             padding: '0.75rem 1rem',
             borderRadius: 6,
@@ -108,7 +109,7 @@ export const TicketCheckIn = () => {
       {relatedSeats.length > 0 && (
         <div>
           <h4 style={{ marginBottom: '0.75rem', fontSize: '1.1rem', textAlign: 'center' }}>
-            Seats for Ticket {checkedInTicketId}
+            Seats for Ticket {checkedInTicketCode}
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
             {relatedSeats.map(seat => (
@@ -123,7 +124,7 @@ export const TicketCheckIn = () => {
                   boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
                 }}
               >
-                {seat.id}
+                {seat.label} ({seat.level})
               </div>
             ))}
           </div>

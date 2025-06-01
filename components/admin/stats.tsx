@@ -1,3 +1,4 @@
+import { Customer, Seat, Ticket } from '@/lib/db';
 import React from 'react';
 import {
   PieChart,

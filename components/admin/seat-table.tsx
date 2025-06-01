@@ -8,6 +8,7 @@ import {
   GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
+import { Seat } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -25,6 +26,9 @@ export const SeatTable: React.FC<{ seats: Seat[] }> = ({ seats }) => {
   
   const columnDefs: ColDef[] = [
     { field: 'id', headerName: 'Seat ID' },
+    { field: 'label', headerName: 'Label' },
+    { field: 'level', headerName: 'Level' },
+    { field: 'category', headerName: 'Category' },
     { field: 'isAvailable', headerName: 'Available' },
     { field: 'reservedBy', headerName: 'Reserved By' },
   ];

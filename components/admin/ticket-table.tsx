@@ -8,6 +8,7 @@ import {
   GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
+import { Ticket } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
