@@ -1,5 +1,7 @@
 export default function Page() {
-    return (
-        <div></div>
-    );
+  return (
+    <div>
+      <p>Help page (WIP)</p>
+    </div>
+  );
 }

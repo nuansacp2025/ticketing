@@ -50,7 +50,7 @@ export default function Home() {
                 <p>You will be able to choose your seat allocation on this website after we have sent you a confirmation email for your purchase. This may take up to 72 hours after transaction.</p>
               </div>
               <div className="w-full space-y-2">
-                <RegularButton variant="black" sizeClass="w-full max-w-[480px] h-[48px] rounded-3xl">
+                <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">
                   <span className="text-base sm:text-lg font-medium">Take me to the store!</span>
                 </RegularButton>
                 <Link href="/login">

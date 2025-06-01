@@ -10,6 +10,10 @@ export default function Page() {
   const openSeatView = () => { setSeatView(true) };
   const closeSeatView = () => { setSeatView(false) };
 
+  function handleLogout() {
+    // TODO
+  }
+
   return (
     <>
       <div className={`w-full max-w-[720px] min-h-2/3 m-8 p-8 sm:p-16 flex flex-col items-center justify-center rounded-2xl bg-[#EEEEEE] text-background ${seatView && "hidden"}`}>
@@ -39,9 +43,9 @@ export default function Page() {
             </div>
             <p className="text-xs sm:text-sm font-light">
               Have another ticket?{" "}
-              <Link href="/logout"><InlineButton>
+              <InlineButton onClick={handleLogout}>
                 Log out
-              </InlineButton></Link>
+              </InlineButton>
               {" "}first.
             </p>
           </div>
@@ -74,9 +78,11 @@ export default function Page() {
               <div className="w-full flex flex-col items-center space-y-4 text-center">
                 <div className="sm:px-4 flex flex-col items-center space-y-1 text-sm sm:text-base font-light">
                   <p>Please check that you have received an email from us.</p>
-                  <p><InlineButton>
-                    Haven't received your email?
-                  </InlineButton></p>
+                  <Link href="/help#find-confirmation-email">
+                    <p><InlineButton>
+                      Haven't received your email?
+                    </InlineButton></p>
+                  </Link>
                 </div>
                 <Link href="/share/example" className="w-full">
                   <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">
