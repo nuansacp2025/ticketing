@@ -31,6 +31,7 @@ export const JoinedTicketTable: React.FC<{
             seatConfirmed: t.seatConfirmed,
             checkedIn:     t.checkedIn,
             customerId:    owner?.id       ?? '',
+            customerEmail: owner?.email    ?? '',
             catA:          t.catA,
             catB:          t.catB,
             catC:          t.catC,
@@ -44,9 +45,10 @@ export const JoinedTicketTable: React.FC<{
         { field: 'seatConfirmed', headerName: 'Seat Confirmed' },
         { field: 'checkedIn',     headerName: 'Checked In' },
         { field: 'customerId',    headerName: 'Customer ID' },
-        { field: 'catA',          headerName: 'Category A' },
-        { field: 'catB',          headerName: 'Category B' },
-        { field: 'catC',          headerName: 'Category C' },
+        { field: 'customerEmail', headerName: 'Customer Email' },
+        { field: 'catA',          headerName: 'Cat. A' },
+        { field: 'catB',          headerName: 'Cat. B' },
+        { field: 'catC',          headerName: 'Cat. C' },
     ];
 
     const defaultColDef: ColDef = {
@@ -61,7 +63,7 @@ export const JoinedTicketTable: React.FC<{
         if (gridApi.current) {
             gridApi.current.exportDataAsCsv({
                 fileName: 'joined_ticket_data.csv',
-                columnKeys: ['ticketId', 'code', 'category', 'seatConfirmed', 'checkedIn', 'customerId'],
+                columnKeys: ['ticketId', 'code', 'seatConfirmed', 'checkedIn', 'customerId', 'customerEmail', 'catA', 'catB', 'catC'],
             });
         }
     }

@@ -32,13 +32,12 @@ export const JoinedSeatTable: React.FC<{
 
             return {
                 seatId:      s.id,
+                category:    s.category,
                 available:   s.isAvailable,
                 reservedBy:  s.reservedBy ?? '',
-                ticketId:    ticket?.id       ?? '',
-                code:        ticket?.code     ?? '',
-                seatConfirmed: ticket?.seatConfirmed ?? false,
-                checkedIn:     ticket?.checkedIn   ?? false,
+                ticketCode:  ticket?.code     ?? '',
                 customerId:  owner?.id        ?? '',
+                customerEmail: owner?.email   ?? '',
             };
         }), 
     [seats, tickets, customers]
@@ -47,13 +46,12 @@ export const JoinedSeatTable: React.FC<{
   // Define column definitions
   const columnDefs: ColDef[] = [
     { field: 'seatId',      headerName: 'Seat ID' },
+    { field: 'category',    headerName: 'Category' },
     { field: 'available',   headerName: 'Available' },
-    { field: 'reservedBy',  headerName: 'Reserved By' },
-    { field: 'ticketId',    headerName: 'Ticket ID' },
-    { field: 'code',        headerName: 'Code' },
-    { field: 'seatConfirmed', headerName: 'Seat Confirmed' },
-    { field: 'checkedIn',     headerName: 'Checked In' },
+    { field: 'reservedBy',  headerName: 'Reserved By (Ticket ID)' },
+    { field: 'ticketCode',  headerName: 'Ticket Code' },
     { field: 'customerId',  headerName: 'Customer ID' },
+    { field: 'customerEmail',  headerName: 'Customer Email' },
   ];
 
   const defaultColDef = {
@@ -68,7 +66,7 @@ export const JoinedSeatTable: React.FC<{
     if (gridApi.current) {
       gridApi.current.exportDataAsCsv({
         fileName: 'joined_seat_data.csv',
-        columnKeys: ['seatId', 'available', 'reservedBy', 'ticketId', 'code', 'category', 'seatConfirmed', 'checkedIn', 'customerId'],
+        columnKeys: ['seatId', 'category', 'available', 'reservedBy', 'ticketCode', 'customerId', 'customerEmail'],
       });
     }
   }

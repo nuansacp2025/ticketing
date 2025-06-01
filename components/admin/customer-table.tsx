@@ -41,7 +41,7 @@ export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }
     if (gridApi.current) {
       gridApi.current.exportDataAsCsv({
         fileName: 'customer.csv',
-        columnKeys: ['id', 'email', 'ticketIds'],
+        columnKeys: ['id', 'email', 'ticketCount'],
       });
     }
   }
