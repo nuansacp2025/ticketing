@@ -53,7 +53,7 @@ export const RegularButton: React.FC<{
 };
 
 export const InlineButton: React.FC<{
-  children: string,
+  children: ReactNode,
   onClick?: () => void,
 }> = ({ children, onClick }) => {
   return (
