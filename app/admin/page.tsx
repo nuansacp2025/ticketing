@@ -15,6 +15,7 @@ import { CustomerTable } from '@/components/admin/customer-table';
 import { JoinedTicketTable } from '@/components/admin/joined-ticket-table';
 import { JoinedSeatTable } from '@/components/admin/joined-seat-table';
 import { TicketCheckIn } from '@/components/admin/ticket-checkin';
+import { Customer, Seat, Ticket } from '@/lib/db';
 
 // register AG Grid community modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
