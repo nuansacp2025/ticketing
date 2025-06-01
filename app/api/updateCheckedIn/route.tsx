@@ -14,9 +14,8 @@ export async function POST(request: NextRequest) {
         }
         const decoded = await verifyAdmin(token);
 
-        const body = await request.json(); 
-        await updateCheckedInStatus(body.ticketId);
-        const seats = await getSeatsQuery({ reservedBy: body.ticketId });
+        const body = await request.json();
+        const seats = await updateCheckedInStatus(body.ticketCode);
         return NextResponse.json({ status: 200, error: "", seats: seats });
     } catch (error: any) {
         if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });

@@ -1,4 +1,4 @@
-import { getCustomerByTicketId, getSeats, getTicket } from "./db";
+import { getCustomerByTicketId, getSeats, getSeatsQuery, getTicket, getTicketByCode } from "./db";
 import {
     collection,
     getDocs,
@@ -41,8 +41,8 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     };
 }
 
-export async function updateCheckedInStatus(ticketId: string) {
-    const ticket = await getTicket(ticketId);
+export async function updateCheckedInStatus(ticketCode: string) {
+    const ticket = await getTicketByCode(ticketCode);
     if (ticket == null) {
         throw new NotFoundError("Ticket not found");
     }
@@ -52,8 +52,11 @@ export async function updateCheckedInStatus(ticketId: string) {
     if (!ticket?.seatConfirmed) {
         throw new BadRequestError("Seat need to be confirmed first");
     }
-    const ticketRef = doc(db, "tickets", ticketId);
+    const seats = await getSeatsQuery({ reservedBy: ticket.id });
+
+    const ticketRef = doc(db, "tickets", ticket.id);
     await updateDoc(ticketRef, { checkedIn: true });
+    return seats;
 }
 
 /* Deprecated -- client should use the Firestore SDK for real-time updates
