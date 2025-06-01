@@ -1,3 +1,15 @@
+TODO: Prettify this README and remove the irrelevant Next.js section.
+
+## Developer Guide
+
+This repository contains both a Next.js project and a minimal Flask app. Vercel allows deploying such that both the Typescript APIs from Next.js route handlers and the Python-based APIs from Flask work together.
+
+To run the development environment locally, run `npm run dev` as usual. You can also run Next.js or Flask separately, by using `npm run next-dev` or `npm run flask-dev`, respectively.
+
+By default, the local server for Next.js should be hosted at `localhost:3000`, whereas Flask should be hosted at `127.0.0.1:8000`. For the Vercel deployment, both APIs are accessed from `[deployment-url]/api`.
+
+### Automatically-generated README by `create-next-app`
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

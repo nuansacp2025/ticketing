@@ -20,15 +20,45 @@ export interface Customer {
 export interface Ticket {
     id: string,
     code: string,
-    category: string,
+    catA: Number,
+    catB: Number,
+    catC: Number,
     seatConfirmed: boolean,
     checkedIn: boolean
 }
 
 export interface Seat {
     id: string,
+    label: string,
+    level: string,  // "level-1"/"level-2"
     isAvailable: boolean,
     reservedBy: string | null,
+    category: string,  // "catA"/"catB"/"catC"
+
+    // Below is metadata; only needed for UI
+    location?: {
+        x: number,
+        y: number,
+        rot: number,
+    }
+    notSelectable?: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
+    leftId?: string,
+    rightId?: string,
+}
+
+export interface SeatMetadata {
+    id: string,
+    label: string,
+    level: string,
+    category: string,
+    location: {
+        x: number,
+        y: number,
+        rot: number,
+    }
+    notSelectable: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
+    leftId: string,
+    rightId: string,
 }
 
 export async function getCustomer(id: string): Promise<Customer | null> {
@@ -89,7 +119,9 @@ export async function getTickets(): Promise<Ticket[]> {
         tickets.push({
             id: docSnap.id,
             code: data.code,
-            category: data.category,
+            catA: data.catA,
+            catB: data.catB,
+            catC: data.catC,
             seatConfirmed: data.seatConfirmed,
             checkedIn: data.checkedIn
         });
@@ -98,12 +130,6 @@ export async function getTickets(): Promise<Ticket[]> {
     return tickets;
 }
 
-export async function setTicketCheckedIn(ticketId: string): Promise<void> {
-    const ticketRef = doc(db, "tickets", ticketId);
-    await updateDoc(ticketRef, { checkedIn: true });
-}
-
-  
 export async function getTicketByCode(code: string) {
     const ticketsRef = collection(db, 'tickets');
     const q = query(ticketsRef, where('code', '==', code));
@@ -113,7 +139,9 @@ export async function getTicketByCode(code: string) {
     const ticket: Ticket = {
         id: doc.id,
         code: doc.data().code,
-        category: doc.data().category,
+        catA: doc.data().catA,
+        catB: doc.data().catB,
+        catC: doc.data().catC,
         seatConfirmed: doc.data().seatConfirmed,
         checkedIn: doc.data().checkedIn
     };
@@ -135,6 +163,47 @@ export async function getCustomerByTicketId(ticketId: string): Promise<Customer 
     return customer;
 }
 
+export async function getSeatsQuery(filters: {
+    id?: string,
+    isAvailable?: boolean,
+    reservedBy?: string | null,
+    category?: string
+}): Promise<Seat[]> {
+    const seatsRef = collection(db, 'seats');
+    let q = query(seatsRef);
+
+    if (filters.id) {
+        q = query(q, where('id', '==', filters.id));
+    }
+    if (filters.isAvailable !== undefined) {
+        q = query(q, where('isAvailable', '==', filters.isAvailable));
+    }
+    if (filters.reservedBy !== undefined) {
+        q = query(q, where('reservedBy', '==', filters.reservedBy));
+    }
+    if (filters.category) {
+        q = query(q, where('category', '==', filters.category));
+    }
+
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return [];
+    
+    const seats: Seat[] = [];
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.notSelectable) return;
+        seats.push({
+            id: docSnap.id,
+            label: data.label,
+            level: data.level,
+            isAvailable: data.isAvailable,
+            reservedBy: data.reservedBy ?? null,
+            category: data.category
+        });
+    });
+    return seats;
+}
+
   
 export async function getSeats(): Promise<Seat[]> {
     const snap = await getDocs(collection(db, "seats"));
@@ -143,52 +212,39 @@ export async function getSeats(): Promise<Seat[]> {
 
     snap.forEach(docSnap => {
         const data = docSnap.data();
+        if (data.notSelectable) return;
         seats.push({
             id: docSnap.id,
+            label: data.label,
+            level: data.level,
             isAvailable: data.isAvailable,
-            reservedBy: data.reservedBy ?? null
+            reservedBy: data.reservedBy ?? null,
+            category: data.category
         });
     });
 
     return seats;
 }
-  
-export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
-  const snap = await getDocs(collection(db, "seats"));
-  let seatsAvailability = new Map<String, boolean>();
-  if (snap.empty) return seatsAvailability;
 
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    seatsAvailability.set(docSnap.id, data.isAvailable);
-  });
-  console.log(seatsAvailability);
-  return seatsAvailability;
+export async function getSeatsMetadata(): Promise<SeatMetadata[]> {
+    const snap = await getDocs(collection(db, "seats"));
+    if (snap.empty) return [];
+    const seats: SeatMetadata[] = [];
+
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        seats.push({
+            id: docSnap.id,
+            label: data.label,
+            level: data.level,
+            category: data.category,
+            location: data.location,
+            notSelectable: data.notSelectable,
+            leftId: data.leftId,
+            rightId: data.rightId,
+        });
+    });
+
+    return seats;
 }
 
-export async function setSeatsReserved(ids: string[], ticketIds: string[]) {
-  await runTransaction(db, async (transaction) => {
-    for (let i = 0; i < ids.length; i++) {
-      const seatRef = doc(db, "seats", ids[i]);
-      const seatDoc = await getDoc(seatRef);
-      const ticketRef = doc(db, "tickets", ticketIds[i]);
-      const ticketDoc = await getDoc(ticketRef);
-      if (!ticketDoc.exists()) {
-        throw new Error("Ticket(s) are not exist");
-      }
-      // Assumption: ticket can only confirm seat at most once
-      if (ticketDoc.data().seatConfirmed) {
-        throw new Error("Ticket(s) have confirmed seat(s)")
-      }
-      if (!seatDoc.exists() || seatDoc.data().isAvailable == false) {
-        throw new Error("Seat(s) are not available");
-      }
-    }
-    for (let i = 0; i < ids.length; i++) {
-      const seatRef = doc(db, "seats", ids[i]);
-      const ticketRef = doc(db, "tickets", ticketIds[i]);
-      await updateDoc(seatRef, { isAvailable: false, reservedBy: ticketIds[i] });
-      await updateDoc(ticketRef, { seatConfirmed: true });
-    }
-  });
-}
