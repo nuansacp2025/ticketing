@@ -55,7 +55,16 @@ export const TicketCheckIn = () => {
       </h3>
 
       {/* Input Form */}
-      <form onSubmit={handleCheckIn} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '1rem' }}>
+      <form
+        onSubmit={handleCheckIn}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: '0.75rem',
+          marginBottom: '1rem',
+        }}
+        className="ticket-checkin-form"
+      >
         <input
           type="text"
           placeholder="Ticket Code"
@@ -88,6 +97,13 @@ export const TicketCheckIn = () => {
         >
           Check In
         </button>
+        <style jsx>{`
+          @media (max-width: 600px) {
+            .ticket-checkin-form {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
       </form>
 
       {/* Status Message */}
@@ -111,23 +127,34 @@ export const TicketCheckIn = () => {
           <h4 style={{ marginBottom: '0.75rem', fontSize: '1.1rem', textAlign: 'center' }}>
             Seats for Ticket {checkedInTicketCode}
           </h4>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
-            {relatedSeats.map(seat => (
-              <div
-                key={seat.id}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: '#004b23',
-                  borderRadius: 4,
-                  textAlign: 'center',
-                  fontWeight: 600,
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
-                }}
-              >
-                {seat.label} ({seat.level})
-              </div>
-            ))}
-          </div>
+          {["catA", "catB", "catC"].map(cat => {
+            const catSeats = relatedSeats.filter(({ category }) => category === cat);
+            if (catSeats.length === 0) return null;
+            return (
+              <>
+                <h2 style={{ marginBottom: '0.25rem' }}>
+                  Category {cat.charAt(3)}
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  {catSeats.map(seat => (
+                    <div
+                      key={seat.id}
+                      style={{
+                        padding: '0.5rem',
+                        backgroundColor: '#004b23',
+                        borderRadius: 4,
+                        textAlign: 'center',
+                        fontWeight: 600,
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {seat.label} ({seat.level})
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })}
         </div>
       )}
 
