@@ -248,3 +248,26 @@ export async function getSeatsMetadata(): Promise<SeatMetadata[]> {
     return seats;
 }
 
+export async function getSeatsByTicketId(ticketId: string): Promise<Seat[]> {
+    const seatsRef = collection(db, 'seats');
+    const q = query(seatsRef, where('reservedBy', '==', ticketId));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) return [];
+
+    const seats: Seat[] = [];
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.notSelectable) return; // ignore non-selectable seats
+        seats.push({
+            id: docSnap.id,
+            label: data.label,
+            level: data.level,
+            isAvailable: data.isAvailable,
+            reservedBy: data.reservedBy ?? null,
+            category: data.category,
+        });
+    });
+
+    return seats;
+}

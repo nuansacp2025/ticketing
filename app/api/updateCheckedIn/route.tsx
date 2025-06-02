@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdmin } from "@/lib/auth";
 import { updateCheckedInStatus } from "@/lib/protected";
-import { getSeatsQuery } from "@/lib/db";
 import { ApiError, UnauthorizedError } from "@/lib/error";
 
 export async function POST(request: NextRequest) {
@@ -14,9 +13,8 @@ export async function POST(request: NextRequest) {
         }
         const decoded = await verifyAdmin(token);
 
-        const body = await request.json(); 
-        await updateCheckedInStatus(body.ticketId);
-        const seats = await getSeatsQuery({ reservedBy: body.ticketId });
+        const body = await request.json();
+        const seats = await updateCheckedInStatus(body.ticketCode);
         return NextResponse.json({ status: 200, error: "", seats: seats });
     } catch (error: any) {
         if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });

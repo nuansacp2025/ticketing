@@ -1,3 +1,4 @@
+import { Customer, Seat, Ticket } from '@/lib/db';
 import React from 'react';
 import {
   PieChart,
@@ -15,7 +16,7 @@ interface StatsProps {
 }
 
 // Palette: main green & neutral gray
-const COLORS = ['#66BB6A', '#EEEEEE'];
+const COLORS = ['#66BB6A', '#EEEEEE', '#FFA500'];
 
 export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     const ticketMap = new Map<string, Ticket>(tickets.map(t => [t.id, t]));
@@ -25,15 +26,17 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     ).length;
 
     const totalTickets = tickets.length;
-    const confirmedTickets = tickets.filter(t => t.seatConfirmed).length;
+    const unconfirmedTickets = tickets.filter(t => !t.seatConfirmed).length;
+    const checkedInTickets = tickets.filter(t => t.checkedIn).length;
 
     const totalSeats = seats.length;
     const reservedSeats = seats.filter(s => !s.isAvailable).length;
 
-    const makeData = (yes: number, total: number) => [
-        { name: 'Confirmed', value: yes },
-        { name: 'Unconfirmed', value: total - yes },
-    ];
+    const makeData = (data: number[], titles: string[], colors: string[]) => data.map((value, index) => ({
+        name: titles[index],
+        value: value,
+        color: colors[index % colors.length],
+    }));
 
     // Styles
     const grid = {
@@ -83,18 +86,18 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
             {[
             {
                 key: 'customers',
-                label: 'Customers Confirmed',
-                data: makeData(confirmedCustomers, totalCustomers),
+                label: 'Customers Status',
+                data: makeData([totalCustomers - confirmedCustomers, confirmedCustomers], ['Unconfirmed', 'Confirmed'], COLORS),
             },
             {
                 key: 'tickets',
-                label: 'Tickets Confirmed',
-                data: makeData(confirmedTickets, totalTickets),
+                label: 'Tickets Status',
+                data: makeData([unconfirmedTickets, totalTickets - unconfirmedTickets - checkedInTickets, checkedInTickets], ['Unconfirmed', 'Confirmed but not Checked In', 'Checked In'], COLORS),
             },
             {
                 key: 'seats',
-                label: 'Seats Reserved',
-                data: makeData(reservedSeats, totalSeats),
+                label: 'Seats Status',
+                data: makeData([totalSeats - reservedSeats, reservedSeats], ['Available', 'Reserved'], COLORS),
             },
             ].map(({ key, label, data }) => {
                 const totalValue = data.reduce((sum, d) => sum + d.value, 0);
@@ -124,7 +127,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
                             {data.map((_, i) => (
                                 <Cell key={
                                 `cell-${i}`
-                                } fill={COLORS[i % COLORS.length]} />
+                                } fill={data[i].color} />
                             ))}
                             </Pie>
                             <Tooltip
@@ -140,7 +143,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
                             />
                         </PieChart>
                         </ResponsiveContainer>
-                        {/* Centered Label */}
+                        {/* Centered Label
                         <div
                         style={{
                             position: 'absolute',
@@ -153,7 +156,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
                         }}
                         >
                         {percent}%
-                        </div>
+                        </div> */}
                     </div>
                     </div>
                 );
