@@ -41,6 +41,19 @@ export default function Page() {
     })
   };
 
+  React.useEffect(() => {
+    fetch("/api/loginUser", {
+      method: "GET",
+      credentials: "include",
+    }).then(res => {
+      if (res.ok) {
+        router.push("/ticket");
+      }
+      else if (res.status === 401) return;
+      else throw new Error("An unknown error occurred while verifying your credentials.");
+    });
+  }, []);
+
   return (
     <div className="w-full max-w-[720px] min-h-2/3 m-8 p-8 sm:p-16 flex flex-col items-center justify-center rounded-2xl bg-[#EEEEEE] text-background">
       <form onSubmit={handleSubmit(handleLogin)}>
