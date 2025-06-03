@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import {
   Chart as ChartJS,
@@ -14,14 +14,16 @@ import { Stats } from '@/components/admin/stats';
 import { CustomerTable } from '@/components/admin/customer-table';
 import { JoinedTicketTable } from '@/components/admin/joined-ticket-table';
 import { JoinedSeatTable } from '@/components/admin/joined-seat-table';
+import { TicketCheckIn } from '@/components/admin/ticket-checkin';
+import { Customer, Seat, Ticket } from '@/lib/db';
 
 // register AG Grid community modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-type Tab = 'Customers' | 'Tickets' | 'Seats' | 'Statistics';
-const tabs: Tab[] = ['Customers', 'Tickets', 'Seats', 'Statistics'];
+type Tab = 'CheckIn' | 'Customers' | 'Tickets' | 'Seats' | 'Statistics';
+const tabs: Tab[] = ['CheckIn', 'Customers', 'Tickets', 'Seats', 'Statistics'];
 
 export default function AdminPage() {
   // Authentication state
@@ -31,7 +33,7 @@ export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Data state
-  const [activeTab, setActiveTab] = useState<Tab>('Customers');
+  const [activeTab, setActiveTab] = useState<Tab>('CheckIn');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
@@ -40,163 +42,133 @@ export default function AdminPage() {
   useEffect(() => {
     fetch('/api/loginAdmin')
       .then(res => res.json())
-      .then(data => {
-        setIsLoggedIn(data.loggedIn);
-      })
-      .catch(err => console.error('Error checking login status:', err));
+      .then(data => setIsLoggedIn(data.loggedIn))
+      .catch(err => console.error('Error checking login:', err));
   }, []);
 
   // Fetch data only when logged in
   useEffect(() => {
     if (!isLoggedIn) return;
-    // fetch('/mock_data.json')
-    //   .then(res => {
-    //     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    //     return res.json();
-    //   })
-    //   .then((data: {
-    //     customers: Record<string, Omit<Customer, 'id'>>;
-    //     tickets: Record<string, Omit<Ticket, 'id'>>;
-    //     seats: Record<string, Omit<Seat, 'id'>>;
-    //   }) => {
-    //     const customersArray = Object.entries(data.customers).map(([id, value]) => ({ id, ...value }));
-    //     const ticketsArray   = Object.entries(data.tickets).map(([id, value]) => ({ id, ...value }));
-    //     const seatsArray     = Object.entries(data.seats).map(([id, value]) => ({ id, ...value }));
-    //     setCustomers(customersArray);
-    //     setTickets(ticketsArray);
-    //     setSeats(seatsArray);
-    //   })
-    //   .catch(err => console.error('Error fetching data:', err));
-    // Fetch data
     fetch('/api/getAllCustomers')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Record<string, Omit<Customer, 'id'>>) => {
-        const customersArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-        setCustomers(customersArray);
-      })
-      .catch(err => console.error('Error fetching customers:', err));
+      .then(res => res.json())
+      .then((data: Record<string, Omit<Customer, 'id'>>) => setCustomers(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
+      .catch(console.error);
     fetch('/api/getAllTickets')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Record<string, Omit<Ticket, 'id'>>) => {
-        console.log(data);
-        const ticketsArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-        setTickets(ticketsArray);
-      })
-      .catch(err => console.error('Error fetching tickets:', err));
+      .then(res => res.json())
+      .then((data: Record<string, Omit<Ticket, 'id'>>) => setTickets(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
+      .catch(console.error);
     fetch('/api/getAllSeats')
-      .then(res => {
-        return res.json();
-      })
-      .then((data: Record<string, Omit<Seat, 'id'>>) => {
-        const seatsArray = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-        setSeats(seatsArray);
-      })
-      .catch(err => console.error('Error fetching seats:', err));
+      .then(res => res.json())
+      .then((data: Record<string, Omit<Seat, 'id'>>) => setSeats(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
+      .catch(console.error);
   }, [isLoggedIn]);
-
-  useEffect(() => {
-    console.log("Customer: ", customers);
-    console.log("Ticket: ", tickets);
-    console.log("Seat: ", seats);
-  }, [customers, tickets, seats]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('api/loginAdmin', {
+      const res = await fetch('/api/loginAdmin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if(res.ok) {
-        const data = await res.json();
-        console.log(data);
-        if (data.success) {
-          setIsLoggedIn(true);
-          setError(null);
-        } else {
-          setError(data.error || 'Login failed');
-        }
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsLoggedIn(true);
+        setError(null);
       } else {
-        const data = await res.json();
         setError(data.error || 'Login failed');
-        return;
       }
-    } catch (err) {
-      console.error('Login error:', err);
+    } catch {
       setError('Login failed');
-      return;
     }
   };
 
-  // Styles
-  const container = { background: '#010a04', padding: 24, minHeight: '100vh', color: '#e6f2e6' };
-  const header    = { fontSize: '2rem', marginBottom: 16, color: '#fff' };
-  const tabsBar   = { display: 'flex', gap: 12, marginBottom: 24 };
-  const tabBtn    = (active: boolean) => ({
-    padding: '8px 16px', cursor: 'pointer', borderRadius: 4,
-    background: active ? '#006400' : 'transparent',
-    border: active ? '1px solid #006400' : '1px solid transparent',
-    color: active ? '#fff' : '#a0a0a0', fontWeight: active ? 600 : 400,
-  });
-  const section   = { marginBottom: 32 };
-
-  // If not logged in, render login form
+  // Not logged in: centered login card
   if (!isLoggedIn) {
     return (
-      <div style={{ ...container, maxWidth: 400, margin: '100px auto', border: '1px solid #006400', borderRadius: 8 }}>
-        <h2 style={{ ...header, textAlign: 'center' }}>Admin Login</h2>
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={{ padding: 8, borderRadius: 4, border: '1px solid #004b23' }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            style={{ padding: 8, borderRadius: 4, border: '1px solid #004b23' }}
-          />
-          {error && <div style={{ color: '#ff6b6b' }}>{error}</div>}
-          <button type="submit" style={{ padding: '8px', borderRadius: 4, background: '#006400', color: '#fff', border: 'none' }}>
-            Login
-          </button>
-        </form>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#010a04',
+      }}>
+        <div style={{
+          backgroundColor: '#013220',
+          padding: '2rem',
+          borderRadius: 8,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+          width: '100%',
+          maxWidth: 360,
+        }}>
+          <h2 style={{ color: '#e6f2e6', textAlign: 'center', marginBottom: '1.5rem' }}>Admin Login</h2>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{ padding: '0.75rem', borderRadius: 6, border: '2px solid #006400', backgroundColor: '#004b23', color: '#e6f2e6' }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              style={{ padding: '0.75rem', borderRadius: 6, border: '2px solid #006400', backgroundColor: '#004b23', color: '#e6f2e6' }}
+            />
+            {error && <div style={{ color: '#f44336', textAlign: 'center' }}>{error}</div>}
+            <button
+              type="submit"
+              style={{
+                padding: '0.75rem',
+                backgroundColor: '#006400',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Login
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
 
+  // Logged in: dashboard layout
   return (
-    <div style={container}>
-      <h1 style={header}>Admin Dashboard</h1>
-      <div style={tabsBar}>
-        {tabs.map(t => (
-          <button key={t} style={tabBtn(t === activeTab)} onClick={() => setActiveTab(t)}>
-            {t}
+    <div style={{ backgroundColor: '#010a04', minHeight: '100vh', padding: '2rem', color: '#e6f2e6' }}>
+      <header style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2.5rem', margin: 0 }}>🎛️ Admin Dashboard</h1>
+      </header>
+      <nav style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', overflowX: 'auto' }}>
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: 6,
+              backgroundColor: activeTab === tab ? '#006400' : 'transparent',
+              border: activeTab === tab ? '2px solid #006400' : '2px solid transparent',
+              color: activeTab === tab ? '#fff' : '#a0a0a0',
+              cursor: 'pointer',
+            }}
+          >
+            {tab === 'CheckIn' ? 'Ticket Check-In' : tab}
           </button>
         ))}
-      </div>
-
-      {activeTab === 'Customers' && (
-        <div style={section}><CustomerTable customers={customers} /></div>
-      )}
-      {activeTab === 'Tickets' && (
-        <div style={section}><JoinedTicketTable tickets={tickets} customers={customers} /></div>
-      )}
-      {activeTab === 'Seats' && (
-        <div style={section}><JoinedSeatTable tickets={tickets} customers={customers} seats={seats} /></div>
-      )}
-      {activeTab === 'Statistics' && <Stats customers={customers} tickets={tickets} seats={seats} />}
+      </nav>
+      <main style={{ backgroundColor: '#013220', padding: '1.5rem', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+        {activeTab === 'CheckIn' && <TicketCheckIn />}
+        {activeTab === 'Customers' && <CustomerTable customers={customers} />}
+        {activeTab === 'Tickets' && <JoinedTicketTable tickets={tickets} customers={customers} />}
+        {activeTab === 'Seats' && <JoinedSeatTable tickets={tickets} customers={customers} seats={seats} />}
+        {activeTab === 'Statistics' && <Stats customers={customers} tickets={tickets} seats={seats} />}
+      </main>
     </div>
   );
 }

@@ -1,18 +1,24 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import {
   ModuleRegistry,
   AllCommunityModule,
   GridOptions,
   ColDef,
+  GridApi,
   GridReadyEvent,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
+import { Customer } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }) => {
-  const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
+  const gridApi = useRef<GridApi | null>(null);
+  const gridOnReady = (e: GridReadyEvent) => {
+    gridApi.current = e.api;
+    e.api.sizeColumnsToFit();
+  }
 
   const defaultColDef: GridOptions['defaultColDef'] = {
     flex: 1,
@@ -21,7 +27,6 @@ export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }
     sortable: true,
     filter: true,
   };
-
   
   const columnDefs: ColDef[] = [
     { field: 'id', headerName: 'Customer ID' },
@@ -31,6 +36,15 @@ export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }
       valueGetter: params => params.data.ticketIds.length,
     }
   ];
+
+  const exportCsv = () => {
+    if (gridApi.current) {
+      gridApi.current.exportDataAsCsv({
+        fileName: 'customer.csv',
+        columnKeys: ['id', 'email', 'ticketCount'],
+      });
+    }
+  }
 
   return (
     <div style={{ width: '100%' }}>
@@ -44,6 +58,25 @@ export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }
         pagination={true}
         animateRows={true}
       />
+      <button
+        onClick={exportCsv}
+        className={`
+          mt-4
+          px-4 py-2
+          bg-gradient-to-br from-green-500 to-green-600
+          text-white text-sm font-semibold
+          rounded-lg
+          shadow-md
+          hover:-translate-y-1 hover:shadow-lg
+          active:translate-y-0
+          focus:outline-none
+
+          cursor-pointer
+          hover:cursor-pointer
+        `}
+      >
+        Export CSV
+      </button>
     </div>
   );
 };
