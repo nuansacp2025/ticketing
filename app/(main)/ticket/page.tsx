@@ -5,6 +5,7 @@ import { Profile } from "@/lib/protected";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { Loading } from "@/components/common/loading";
 
 export default function Page() {
   const router = useRouter();
@@ -40,11 +41,7 @@ export default function Page() {
 
   if (profile === null) {
     // TODO
-    return (
-      <div>
-        <p>Loading... (loading page WIP)</p>
-      </div>
-    )
+    return <Loading />;
   }
 
   const categories = new Map<string, [string, number]>([
