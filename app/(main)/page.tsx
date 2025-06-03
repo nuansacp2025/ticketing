@@ -14,13 +14,6 @@ export default function Home() {
 
   return (
     <>
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src="/images/landing/background.jpg" alt="Background" fill
-          className="blur-xs object-cover"
-        />
-        <div className="absolute inset-0 z-10 bg-black/60" />
-      </div>
       <div className="w-full max-w-[720px] h-2/3 m-8 flex flex-col items-center text-center">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-semibold mx-4">NUANSA Cultural Production</h1>
