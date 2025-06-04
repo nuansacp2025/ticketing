@@ -4,7 +4,9 @@ app = Flask(__name__)
 import os
 import csv
 from time import time_ns
-from .scripts.getfile.extract_file import extract_file
+from .scripts.getfile import extract_file
+from .scripts.mailgun.mailer import send_email  # only checking if module can be imported
+from .scripts.processing import read_orders  # only checking if module can be imported
 
 @app.route("/api/python")
 def hello_world():
