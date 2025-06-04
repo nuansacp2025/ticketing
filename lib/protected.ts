@@ -80,9 +80,9 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     const ticketRef = doc(db, "tickets", ticketId);
     const ticketDoc = await getDoc(ticketRef);
     const counts: { [key: string]: number } = {
-        A: 0,
-        B: 0,
-        C: 0,
+        catA: 0,
+        catB: 0,
+        catC: 0,
     };
     for (let i = 0; i < ids.length; i++) {
       const seatRef = doc(db, "seats", ids[i]);
@@ -101,7 +101,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     const currentCatB = ticketDoc.data()?.catB ?? 0;
     const currentCatC = ticketDoc.data()?.catC ?? 0;
 
-    if (currentCatA !== counts.A || currentCatB !== counts.B || currentCatC !== counts.C) {
+    if (currentCatA !== counts.catA || currentCatB !== counts.catB || currentCatC !== counts.catC) {
         throw new ConflictError("Ticket category counts do not match actual reserved seats");
     }
 

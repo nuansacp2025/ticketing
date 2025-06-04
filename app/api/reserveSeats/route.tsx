@@ -3,6 +3,7 @@ import { getMyProfile, setSeatsReserved } from "@/lib/protected";
 import { cookies } from "next/headers";
 import { ApiError, UnauthorizedError } from "@/lib/error";
 import { API_CREDS_INTERNAL_USE_ONLY, PYTHON_API_URL } from "@/lib/constants";
+import { verify } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,11 +12,12 @@ export async function POST(request: NextRequest) {
       if (!token) {
           throw new UnauthorizedError();
       }
+    const { ticketId } = verify(token!);
     const body = await request.json();
 
-    await setSeatsReserved(body.ids, body.ticketId);
+    await setSeatsReserved(body.ids, ticketId);
     
-    const profile = await getMyProfile(body.ticketId);
+    const profile = await getMyProfile(ticketId);
     fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
       method: "POST",
       headers: {
