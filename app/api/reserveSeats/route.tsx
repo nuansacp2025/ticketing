@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
-import { setSeatsReserved } from "@/lib/protected";
+import { getMyProfile, setSeatsReserved } from "@/lib/protected";
 import { cookies } from "next/headers";
 import { ApiError, UnauthorizedError } from "@/lib/error";
+import { API_CREDS_INTERNAL_USE_ONLY, PYTHON_API_URL } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,21 @@ export async function POST(request: NextRequest) {
       }
     const body = await request.json();
 
-    await setSeatsReserved(body.ids, body.ticketIds);
+    await setSeatsReserved(body.ids, body.ticketId);
+    
+    const profile = await getMyProfile(body.ticketId);
+    fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
+      method: "POST",
+      headers: {
+        "X-Internal-API-Credentials": API_CREDS_INTERNAL_USE_ONLY,
+      },
+      body: JSON.stringify({
+        email: profile!.email,
+        ticketCode: profile!.ticketCode,
+        seats: body.ids,
+      }),
+    });
+
     return NextResponse.json({ status: 200 });
   } catch (error: any) {
     if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });

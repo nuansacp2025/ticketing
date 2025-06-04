@@ -97,28 +97,18 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
       }
     }
 
-    const existingReservedSeatsSnap = await getSeatsQuery({ reservedBy: ticketId });
-    for (const seat of existingReservedSeatsSnap) {
-      if (seat.category === "catA") counts.A++;
-      else if (seat.category === "catB") counts.B++;
-      else if (seat.category === "catC") counts.C++;
-    }
-
     const currentCatA = ticketDoc.data()?.catA ?? 0;
     const currentCatB = ticketDoc.data()?.catB ?? 0;
     const currentCatC = ticketDoc.data()?.catC ?? 0;
 
-    if (currentCatA < counts.A || currentCatB < counts.B || currentCatC < counts.C) {
-        throw new ConflictError(
-            `Ticket category counts do not match actual reserved seats:\n` +
-            `Expected - A: ${currentCatA}, B: ${currentCatB}, C: ${currentCatC}\n` +
-            `Found    - A: ${counts.A}, B: ${counts.B}, C: ${counts.C}`
-        );
+    if (currentCatA !== counts.A || currentCatB !== counts.B || currentCatC !== counts.C) {
+        throw new ConflictError("Ticket category counts do not match actual reserved seats");
     }
 
     for (let i = 0; i < ids.length; i++) {
       const seatRef = doc(db, "seats", ids[i]);
       await updateDoc(seatRef, { isAvailable: false, reservedBy: ticketId});
     }
+    await updateDoc(ticketRef, { seatConfirmed: true });
   });
 }
