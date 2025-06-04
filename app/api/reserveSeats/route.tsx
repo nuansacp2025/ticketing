@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     await setSeatsReserved(body.ids, ticketId);
     
     const profile = await getMyProfile(ticketId);
-    fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
+    const emailResponse = await fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
       method: "POST",
       headers: {
         "X-Internal-API-Credentials": API_CREDS_INTERNAL_USE_ONLY,
@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
         seats: body.ids,
       }),
     });
+
+    // TODO: Handle email response
 
     return NextResponse.json({ status: 200 });
   } catch (error: any) {
