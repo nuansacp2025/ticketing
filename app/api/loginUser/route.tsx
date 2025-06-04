@@ -1,4 +1,4 @@
-import { login } from "@/lib/auth";
+import { login, verify } from "@/lib/auth";
 import { BASE_URL } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,5 +14,18 @@ export async function POST(request: NextRequest) {
         return response;
     } else {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+}
+
+export async function GET(request: NextRequest) {
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
+        return NextResponse.json({ loggedIn: false }, { status: 401 });
+    }
+    try {
+        const decoded = await verify(token);
+        return NextResponse.json({ loggedIn: true, ticketId: decoded.ticketId });
+    } catch (e) {
+      return NextResponse.json({ loggedIn: false }, { status: 401 });
     }
 }
