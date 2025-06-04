@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "next-dev": "next dev --turbopack",
-    "flask-dev": "pip3 install -r requirements.txt && python3 api/index.py",
+    "flask-dev": "pip3 install -r requirements.txt && python3 -m api.index",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
     "build": "next build",
     "start": "next start",

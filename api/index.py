@@ -8,7 +8,7 @@ API_CREDS_INTERNAL_USE_ONLY = os.getenv("API_CREDS_INTERNAL_USE_ONLY")
 from flask import Flask, request
 app = Flask(__name__)
 
-from scripts.mailgun.mailer import send_email
+from .scripts.mailgun.mailer import send_email
 
 @app.route("/api/python")
 def hello_world():
@@ -25,6 +25,7 @@ def send_seat_confirmation():
 
     try:
         data = request.get_json()
+        print(data)
         email = data.get("email")
         ticket_code = data.get("ticketCode")
         seats = data.get("seats", [])
@@ -32,10 +33,11 @@ def send_seat_confirmation():
         assert isinstance(email, str)
         assert isinstance(ticket_code, str)
         assert isinstance(seats, list)
-    except:
+    except Exception as e:
+        print(repr(e))
         return { "success": False, "message": "Fields `email`, `ticketCode`, and `seats` required" }, 400
 
-    return send_email(
+    send_email(
         to_email=email,
         subject="NUANSA 2025 Seat Confirmation",
         template_name="seat_confirmation.html",
@@ -45,6 +47,9 @@ def send_seat_confirmation():
             "seat_num": ", ".join(seats),
         }
     )
+
+    # TODO: error handling
+    return { "success": True }, 200
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=8000, debug=True)
