@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdmin } from "@/lib/auth";
 import { updateCheckedInStatus } from "@/lib/protected";
-import { getSeatsQuery } from "@/lib/db";
 import { ApiError, UnauthorizedError } from "@/lib/error";
 
 export async function POST(request: NextRequest) {
