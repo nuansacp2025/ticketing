@@ -4,7 +4,7 @@ app = Flask(__name__)
 import os
 import csv
 from time import time_ns
-from scripts.getfile.extract_file import extract_file
+from .scripts.getfile.extract_file import extract_file
 
 @app.route("/api/python")
 def hello_world():
