@@ -46,7 +46,7 @@ export function CustomerSeatingPlanInterface() {
           </MiniMap>
         </div>
         <div className="absolute bottom-6 right-6">
-          <div className="flex h-12 p-2 bg-[#3E3E3E] rounded-3xl text-[#ededed]">
+          <div className="flex h-12 p-2 bg-[#3E3E3E] rounded-3xl">
             {levelEntries.map(([level, data]) => (
               <div
                 key={level}
