@@ -3,36 +3,134 @@
 import { RegularButton } from "@/components/common/button";
 import { Loading } from "@/components/common/loading";
 import { CustomerContextValue, CustomerSeatingPlanContext, CustomerSeatingPlanInterface } from "@/components/seating-plan/customer/interface";
-import { DefaultSeat, getMockSeatingPlanContextValue, NotSelectableSeat, SelectedSeat, TakenSeat } from "@/components/seating-plan/customer/mock-types";
+import { DefaultSeat, getCustomerSeatingPlanContextValue, NotSelectableSeat, SelectedSeat, TakenSeat } from "@/components/seating-plan/customer/elements";
 import { db } from "@/db/source";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import React from "react";
+import { SeatMetadata } from "@/lib/db";
+import { UISeatMetadata, UISeatSelectionWarning, UISeatState } from "@/components/seating-plan/types";
+import { useRouter } from "next/navigation";
+import { Profile } from "@/lib/protected";
 
 export default function Page() {
+  const router = useRouter();
+
   const [contextValue, setContextValue] = React.useState<CustomerContextValue>(null);
 
   // Force to re-render by changing this value whenever manager.selection changes
   const [rerender, setRerender] = React.useState(0);
 
+  const [confirmDialogIsOpen, setConfirmDialogIsOpen] = React.useState(false);
+
+  const openConfirmDialog = () => { setConfirmDialogIsOpen(true) };
+  const closeConfirmDialog = () => { setConfirmDialogIsOpen(false) };
+
+  const seatSelectionWarningsHandler = (warnings: UISeatSelectionWarning[]) => {
+    warnings.forEach(({ id, type }) => {
+      if (type === "SEAT_TAKEN") {
+        console.log(`Seat ${id} has just been taken; removing from selection`);
+      }
+      if (type === "MAX_CAT_LIMIT_EXCEEDED") {
+        console.log(`Maximum category limit exceeded; removing newest selected seat ${id}`)
+      }
+    });
+  }
+
+  function handleRequestToConfirmSelection() {
+    const isolatedIds = contextValue!.manager.isolatedSeatIds;
+    if (isolatedIds.length > 0) {
+      // TODO: notify user
+      console.log("Selection is invalid as there are isolated seats");
+    } else {
+      openConfirmDialog();
+    }
+  }
+
+  function confirmSelection() {
+    if (contextValue === null) return;
+    fetch("/api/reserveSeats", {
+      method: "POST",
+      body: JSON.stringify({
+        "ids": contextValue.manager.selection,
+      })
+    }).then(res => {
+      if (res.ok) {
+        router.push("/thank-you");
+      }
+      // TODO: Handle incoming errors
+      else throw new Error("An unknown error occurred, please try again.");
+    }).catch((err: any) => {
+      console.log(err);
+    })
+  }
+
+  // Check that user has not confirmed seats, then load seats metadata
   React.useEffect(() => {
-    // Retrieve data from API
-    // Check cookies to retrieve selection from last session
-    setContextValue(getMockSeatingPlanContextValue(() => setRerender(t => t+1)))
+    fetch("/api/getMyProfile", {
+      method: "GET",
+    }).then(res => {
+      if (res.ok) {
+        return res.json();
+      } else if (res.status === 401) {
+        router.push("/login");
+        return null;
+      }
+      // TODO: error handling
+      else throw new Error("Error getting profile");
+    }).then((data: Profile) => {
+      if (data.seatConfirmed) {
+        router.push("/ticket");
+        return;
+      }
+      fetch("/api/getSeatsMetadata", {
+        method: "GET",
+      }).then(res => {
+        return res.json();
+      }).then((metadatas: SeatMetadata[]) => {
+        const seatMap = new Map(metadatas.map(({ id, ...metadata }) => [id, metadata] as [string, UISeatMetadata]));
+
+        // TODO: (enhancement) Check cookies to retrieve selection from last session.
+        const seatStateMap = new Map<string, UISeatState>(Array.from(seatMap.keys()).map(id => {
+          return [id, { selected: false, taken: false }] as [string, UISeatState];
+        }));
+
+        const maxSeatsPerCategory = new Map([
+          ["catA", data.catA],
+          ["catB", data.catB],
+          ["catC", data.catC],
+        ]);
+
+        // TODO: For maintainability, these values are perhaps better stored somewhere else.
+        setContextValue(getCustomerSeatingPlanContextValue(
+          seatMap,
+          seatStateMap,
+          maxSeatsPerCategory,
+          seatSelectionWarningsHandler,
+          setRerender,
+        ));
+      }).catch((err: any) => {
+        console.log(err);
+      });
+    }).catch((err: any) => {
+      console.log(err);
+    });
   }, []);
 
+  // Listen to change in availability (taken status) in real-time
   React.useEffect(() => {
     if (contextValue === null) return;
-    const q = query(collection(db, "seats"));
-    const unsub = onSnapshot(q, async (querySnapshot) => {
+    const unsub = onSnapshot(doc(db, "caches", "seats.isAvailable"), async (doc) => {
       const updates = new Map();
-      querySnapshot.forEach((doc) => {
-        // For the purposes of this demo, we only consider seats with id "level-1_D[11-30]"
-        if (!(doc.id.startsWith("level-1_D"))) return;
-        updates.set(doc.id, !doc.data().isAvailable);
+      const cacheData = doc.data();
+      Array.from(contextValue.manager.seatMap.keys()).forEach(id => {
+        updates.set(id, !(cacheData![id] ?? true))
       });
       const warnings = await contextValue.manager.updateTakenStatus(updates);
       contextValue.seatSelectionWarningsHandler(warnings);
     });
+
+    // Clean-up
+    return unsub;
   }, [contextValue])
 
   if (contextValue === null) {
@@ -124,13 +222,17 @@ export default function Page() {
               </div>
             </div>
             <div className="w-full">
-              <RegularButton variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">
+              <RegularButton
+                variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
+                onClick={handleRequestToConfirmSelection}
+              >
                 <span className="text-sm sm:text-base font-medium">Confirm selection</span>
               </RegularButton>
             </div>
           </div>
         </div>
       </div>
+      {/* TODO: Add confirm dialog */}
     </CustomerSeatingPlanContext.Provider>
   );
 }

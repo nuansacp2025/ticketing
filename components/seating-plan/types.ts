@@ -91,6 +91,7 @@ export class BaseSeatingPlanManager {
     // is related to a violation of some business logic).
 
     // `newSeatIds` contain the seats that are newly selected since the last audit.
+    // This assumes `newSeatIds` is already contained within `manager.selection`.
     // When it is provided, if unselecting seats is necessary, the method should
     // prioritize unselecting these seats where possible.
 
