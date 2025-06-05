@@ -5,7 +5,7 @@ import {
     doc,
     getDoc,
     updateDoc,
-    runTransaction
+    runTransaction,
 } from 'firebase/firestore';
 import { db } from "@/db/source";
 import { BadRequestError, ConflictError, NotFoundError } from "./error";
@@ -122,9 +122,11 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
       throw new ConflictError(`Ticket category counts do not match actual reserved seats (expected: { catA: ${currentCatA}, catB: ${currentCatB}, catC: ${currentCatC} })`);
     }
 
+    const isAvailableCache = doc(db, "caches", "seats.isAvailable");
     for (let i = 0; i < ids.length; i++) {
       await updateDoc(seatRefs[i], { isAvailable: false, reservedBy: ticketId});
     }
+    await updateDoc(isAvailableCache, Object.fromEntries(ids.map(id => [id, true])));
     await updateDoc(ticketRef, { seatConfirmed: true });
   });
 }

@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { getSeatsMetadata } from "@/lib/db";
 import { ApiError } from "@/lib/error";
 
+export const dynamic = "force-static";
+
 export async function GET(request: NextRequest) {
     try {
         const seats = await getSeatsMetadata(); // Ensure it's awaited if async
