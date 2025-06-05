@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { SeatState, SeatMetadata, SeatingPlanContextType, CategoryMetadata, SeatSelectionWarning } from "../types";
+import { UISeatState, UISeatMetadata, SeatingPlanContextType, UICategoryMetadata, UISeatSelectionWarning } from "../types";
 import { SeatWrapper } from "../seating-plan";
 import { CustomerSeatingPlanManager } from "./types";
 import { CustomerSeatingPlanContext } from "./interface";
@@ -58,21 +58,21 @@ const mockCategoryMetadata = {
   },
 };
 
-const catA: CategoryMetadata = {
+const catA: UICategoryMetadata = {
   label: "Cat. A",
   description: "Level 1, Lines G-X",
   style: mockCategoryMetadata.style,
   themes: mockCategoryMetadata.themes,
 };
 
-const catB: CategoryMetadata = {
+const catB: UICategoryMetadata = {
   label: "Cat. B",
   description: "Level 1, Lines AA-GG and LL",
   style: mockCategoryMetadata.style,
   themes: mockCategoryMetadata.themes,
 };
 
-const catC: CategoryMetadata = {
+const catC: UICategoryMetadata = {
   label: "Cat. C",
   description: "Level 2",
   style: mockCategoryMetadata.style,
@@ -85,7 +85,7 @@ const mockCategories = new Map([
   ["catC", catC],
 ]);
 
-const mockSeatMap = new Map<string, SeatMetadata>([
+const mockSeatMap = new Map<string, UISeatMetadata>([
   ...[
     ["level-1_D11", {
       label: "D11",
@@ -99,7 +99,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: null,
       rightId: "level-1_D12",
       category: "catA",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D12", {
       label: "D12",
       location: {
@@ -112,7 +112,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D11",
       rightId: "level-1_D13",
       category: "catA",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D13", {
       label: "D13",
       location: {
@@ -125,7 +125,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D12",
       rightId: "level-1_D14",
       category: "catA",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D14", {
       label: "D14",
       location: {
@@ -138,7 +138,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D13",
       rightId: "level-1_D15",
       category: "catA",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D15", {
       label: "D15",
       location: {
@@ -151,7 +151,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D14",
       rightId: "level-1_D16",
       category: "catA",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D16", {
       label: "D16",
       location: {
@@ -164,7 +164,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D15",
       rightId: "level-1_D17",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D17", {
       label: "D17",
       location: {
@@ -177,7 +177,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D16",
       rightId: "level-1_D18",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D18", {
       label: "D18",
       location: {
@@ -190,7 +190,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D17",
       rightId: "level-1_D19",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D19", {
       label: "D19",
       location: {
@@ -203,7 +203,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D18",
       rightId: "level-1_D20",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D20", {
       label: "D20",
       location: {
@@ -216,7 +216,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D19",
       rightId: "level-1_D21",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D21", {
       label: "D21",
       location: {
@@ -229,7 +229,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D20",
       rightId: "level-1_D22",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D22", {
       label: "D22",
       location: {
@@ -242,7 +242,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D21",
       rightId: "level-1_D23",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D23", {
       label: "D23",
       location: {
@@ -255,7 +255,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D22",
       rightId: "level-1_D24",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D24", {
       label: "D24",
       location: {
@@ -268,7 +268,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D23",
       rightId: "level-1_D25",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D25", {
       label: "D25",
       location: {
@@ -281,7 +281,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D24",
       rightId: "level-1_D26",
       category: "catB",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D26", {
       label: "D26",
       location: {
@@ -294,7 +294,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D25",
       rightId: "level-1_D27",
       category: "catC",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D27", {
       label: "D27",
       location: {
@@ -307,7 +307,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D26",
       rightId: "level-1_D28",
       category: "catC",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D28", {
       label: "D28",
       location: {
@@ -320,7 +320,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D27",
       rightId: "level-1_D29",
       category: "catC",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D29", {
       label: "D29",
       location: {
@@ -333,7 +333,7 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D28",
       rightId: "level-1_D30",
       category: "catC",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
     ["level-1_D30", {
       label: "D30",
       location: {
@@ -346,14 +346,14 @@ const mockSeatMap = new Map<string, SeatMetadata>([
       leftId: "level-1_D29",
       rightId: null,
       category: "catC",
-    }] as [string, SeatMetadata],
+    }] as [string, UISeatMetadata],
   ],
 ]);
 
-const mockSeatStateMap = new Map<string, SeatState>(Array.from(mockSeatMap.keys()).map(id => {
+const mockSeatStateMap = new Map<string, UISeatState>(Array.from(mockSeatMap.keys()).map(id => {
   return [id, {
     selected: false, taken: (id[0] == 'H'),
-  }] as [string, SeatState];
+  }] as [string, UISeatState];
 }));
 
 const MockSeatComponent = ({ id }: { id: string }) => {
@@ -403,7 +403,7 @@ const mockLevels = new Map([
   }],
 ]);
 
-const seatSelectionWarningsHandler = (warnings: SeatSelectionWarning[]) => {
+const seatSelectionWarningsHandler = (warnings: UISeatSelectionWarning[]) => {
   warnings.forEach(({ id, type }) => {
     if (type === "SEAT_TAKEN") {
       console.log(`Seat ${id} has just been taken; removing from selection`);

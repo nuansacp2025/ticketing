@@ -1,7 +1,7 @@
 import { Mutex } from "@/lib/utils";
 import React, { ReactNode } from "react";
 
-export interface SeatMetadata {
+export interface UISeatMetadata {
   label: string
   location: {
     x: number,
@@ -15,7 +15,7 @@ export interface SeatMetadata {
   rightId: string | null,
 }
 
-export interface CategoryMetadata {
+export interface UICategoryMetadata {
   label: string,
   description: string,
   style: {
@@ -30,25 +30,25 @@ export interface CategoryMetadata {
   },
 }
 
-export interface LevelMetadata {
+export interface UILevelMetadata {
   label: string,
   levelSvgUrl: string,
   levelMinimapImgUrl: string,
 }
 
-export interface SeatState {
+export interface UISeatState {
   selected: boolean
   taken: boolean
 }
 
-export interface SeatSelectionWarning {
+export interface UISeatSelectionWarning {
   id: string,
   type: string,
 }
 
 export class BaseSeatingPlanManager {
-  seatMap: Map<string, SeatMetadata>
-  seatStateMap: Map<string, SeatState>
+  seatMap: Map<string, UISeatMetadata>
+  seatStateMap: Map<string, UISeatState>
 
   currentLevel: string
 
@@ -59,8 +59,8 @@ export class BaseSeatingPlanManager {
   _updateContext: () => void
 
   constructor(
-    seatMap: ReadonlyMap<string, SeatMetadata>,
-    initialSeatStateMap: ReadonlyMap<string, SeatState>,
+    seatMap: ReadonlyMap<string, UISeatMetadata>,
+    initialSeatStateMap: ReadonlyMap<string, UISeatState>,
     defaultLevel: string,
     updateContextCallback?: () => void,
   ) {
@@ -84,7 +84,7 @@ export class BaseSeatingPlanManager {
     this._updateContext = updateContextCallback ?? (() => {});
   }
 
-  auditSeatSelection(newSeatIds?: string[]): SeatSelectionWarning[] {
+  auditSeatSelection(newSeatIds?: string[]): UISeatSelectionWarning[] {
     // This method is triggered after every operation that can potentially invalidate
     // the selection. It should unselect seats which require immediate fixing, and
     // return warnings for problematic seats (a seat that either was unselected or
@@ -99,7 +99,7 @@ export class BaseSeatingPlanManager {
     throw new Error("This method should be implemented in the subclass")
   }
 
-  async updateTakenStatus(takenStatusMap: Map<string, boolean>): Promise<SeatSelectionWarning[]> {
+  async updateTakenStatus(takenStatusMap: Map<string, boolean>): Promise<UISeatSelectionWarning[]> {
     // Assumes `takenStatusMap` keys are valid
     return await this._seatStateMapMutex.withLock(() => {
       takenStatusMap.forEach((taken, id) => {
@@ -119,14 +119,14 @@ export class BaseSeatingPlanManager {
     });
   }
 
-  async selectSeat(seatId: string): Promise<SeatSelectionWarning[]> {
+  async selectSeat(seatId: string): Promise<UISeatSelectionWarning[]> {
     return await this.selectSeats([seatId]);
   }
 
-  async selectSeats(seatIds: string[]): Promise<SeatSelectionWarning[]> {
+  async selectSeats(seatIds: string[]): Promise<UISeatSelectionWarning[]> {
     // Assumes `seatIds` is valid
     return await this._seatStateMapMutex.withLock(() => {
-      const warnings: SeatSelectionWarning[] = [];
+      const warnings: UISeatSelectionWarning[] = [];
       seatIds.forEach(seatId => {
         this.seatStateMap.get(seatId)!.selected = true;
         this.selection.push(seatId);
@@ -138,11 +138,11 @@ export class BaseSeatingPlanManager {
     });
   }
 
-  async unselectSeat(seatId: string): Promise<SeatSelectionWarning[]> {
+  async unselectSeat(seatId: string): Promise<UISeatSelectionWarning[]> {
     return await this.unselectSeats([seatId]);
   }
 
-  async unselectSeats(seatIds: string[]): Promise<SeatSelectionWarning[]> {
+  async unselectSeats(seatIds: string[]): Promise<UISeatSelectionWarning[]> {
     // Assumes `seatIds` is valid
     return await this._seatStateMapMutex.withLock(() => {
       seatIds.forEach(id => {
@@ -156,7 +156,7 @@ export class BaseSeatingPlanManager {
     });
   }
 
-  async unselectAllSeats(): Promise<SeatSelectionWarning[]> {
+  async unselectAllSeats(): Promise<UISeatSelectionWarning[]> {
     return await this.unselectSeats(Array.from(this.seatMap.keys()));
   }
 
@@ -169,10 +169,10 @@ export class BaseSeatingPlanManager {
 export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
   width: number,
   height: number,
-  levels: Map<string, LevelMetadata>
-  categories: Map<string, CategoryMetadata>
+  levels: Map<string, UILevelMetadata>
+  categories: Map<string, UICategoryMetadata>
 
   manager: T,
-  seatSelectionWarningsHandler: (warnings: SeatSelectionWarning[]) => Promise<void> | void,
+  seatSelectionWarningsHandler: (warnings: UISeatSelectionWarning[]) => Promise<void> | void,
   SeatComponent: React.FC<{ id: string }>,
 }

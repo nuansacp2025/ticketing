@@ -1,11 +1,11 @@
-import { BaseSeatingPlanManager, SeatMetadata, SeatSelectionWarning, SeatState } from "../types";
+import { BaseSeatingPlanManager, UISeatMetadata, UISeatSelectionWarning, UISeatState } from "../types";
 
 export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
   isolatedSeatIds: string[]
 
   constructor(
-    seatMap: ReadonlyMap<string, SeatMetadata>,
-    initialSeatStateMap: ReadonlyMap<string, SeatState>,
+    seatMap: ReadonlyMap<string, UISeatMetadata>,
+    initialSeatStateMap: ReadonlyMap<string, UISeatState>,
     defaultLevel: string,
     updateContextCallback?: () => void,
   ) {
@@ -14,8 +14,8 @@ export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
     this.auditSeatSelection();
   }
 
-  auditSeatSelection(newSeatIds?: string[]): SeatSelectionWarning[] {
-    const warnings: SeatSelectionWarning[] = [];
+  auditSeatSelection(newSeatIds?: string[]): UISeatSelectionWarning[] {
+    const warnings: UISeatSelectionWarning[] = [];
 
     this.selection = this.selection.filter(id => {
       const state = this.seatStateMap.get(id)!;
@@ -29,7 +29,7 @@ export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
 
     // TODO: implement logic for MAX_CAT_LIMIT_EXCEEDED
 
-    const selectedOrTaken = (state: SeatState) => state.selected || state.taken;
+    const selectedOrTaken = (state: UISeatState) => state.selected || state.taken;
     this.isolatedSeatIds = Array.from(this.seatMap.entries()).filter(([id, data]) => {
       if (selectedOrTaken(this.seatStateMap.get(id)!)) return false;
       const left = (data.leftId === null) || selectedOrTaken(this.seatStateMap.get(data.leftId)!)
