@@ -59,7 +59,7 @@ export class CustomerSeatingPlanManager extends BaseSeatingPlanManager {
       const right = (data.rightId === null) || selectedOrTaken(this.seatStateMap.get(data.rightId)!)
       return (data.leftId !== null || data.rightId !== null) && left && right;
     }).map(([id, _]) => {
-      // warnings.push({ id, type: "SEAT_ISOLATED" });
+      warnings.push({ id, type: "SEAT_ISOLATED" });
       return id;
     });
 

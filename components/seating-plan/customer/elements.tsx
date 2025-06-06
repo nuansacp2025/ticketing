@@ -81,7 +81,7 @@ const catC: UICategoryMetadata = {
   themes: categoryMetadata.themes,
 };
 
-const categories = new Map([
+export const categories = new Map([
   ["catA", catA],
   ["catB", catB],
   ["catC", catC],
@@ -121,7 +121,7 @@ const SeatComponent = ({ id }: { id: string }) => {
   );
 }
 
-const levels = new Map([
+export const levels = new Map([
   ["level-1", {
     label: "Level 1",
     levelSvgUrl: "/seating-plan/level-1.svg",
@@ -135,9 +135,7 @@ const levels = new Map([
 ]);
 
 export function getCustomerSeatingPlanContextValue(
-    seatMap: Map<string, UISeatMetadata>,
-    seatStateMap: Map<string, UISeatState>,
-    maxSeatsPerCategory: Map<string, number>,
+    manager: CustomerSeatingPlanManager,
     seatSelectionWarningsHandler: (warnings: UISeatSelectionWarning[]) => Promise<void> | void,
     setRerender: React.Dispatch<React.SetStateAction<number>>,
 ) {
@@ -147,13 +145,7 @@ export function getCustomerSeatingPlanContextValue(
     levels,
     categories,
 
-    manager: new CustomerSeatingPlanManager(
-        seatMap,
-        seatStateMap,
-        "level-1",
-        maxSeatsPerCategory,
-        () => setRerender(r => r+1)
-    ),
+    manager,
     seatSelectionWarningsHandler,
     SeatComponent,
   } as SeatingPlanContextType<CustomerSeatingPlanManager>;
