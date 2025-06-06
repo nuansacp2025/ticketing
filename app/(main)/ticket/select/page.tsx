@@ -31,20 +31,30 @@ export default function Page() {
 
   const [profile, setProfile] = React.useState<Profile | null>(null);
 
-  const [confirmDialogIsOpen, setConfirmDialogIsOpen] = React.useState(false);
+  // We need this to "lock in" our selection when awaiting the confirmation response, as
+  // `manager.selection` may change at any time (since the dialog will not close in this
+  // period, we don't want the user to see this change and get confused)
+  const [finalSelection, setFinalSelection] = React.useState<string[]>([]);
 
+  const [confirmDialogIsOpen, setConfirmDialogIsOpen] = React.useState(false);
   const openConfirmDialog = () => { setConfirmDialogIsOpen(true) };
   const closeConfirmDialog = () => { setConfirmDialogIsOpen(false) };
 
-  const [submitLoading, setSubmitLoading] = React.useState(false);
+  // Set to true when request to reserve seats is sent and is awaiting for response
+  const [awaitingConfirmation, setAwaitingConfirmation] = React.useState(false);
+
+  // Warnings that were blocked while awaiting confirmation
+  const [pendingWarnings, setPendingWarnings] = React.useState<UISeatSelectionWarning[]>([]);
 
   // This value is only updated every time `rerender` is updated
   const warningContext = assertFinalSelectionValid();
 
   const [showWarningContext, setShowWarningContext] = React.useState(true);
 
-  const userPossiblyAfkRef = React.useRef(false);
-  userPossiblyAfkRef.current = confirmDialogIsOpen && !submitLoading;
+  const confirmDialogIsOpenRef = React.useRef(false);
+  confirmDialogIsOpenRef.current = confirmDialogIsOpen;
+  const awaitingConfirmationRef = React.useRef(false);
+  awaitingConfirmationRef.current = awaitingConfirmation;
 
   function assertFinalSelectionValid(): SeatSelectionWarningContext | null {
     // Checks seat count and presence of isolated seats but does not check conflicts with
@@ -83,22 +93,24 @@ export default function Page() {
     return null;
   }
 
-  function handleRequestToConfirmSelection() {
+  async function handleRequestToConfirmSelection() {
+    if (contextValue === null) return;
     if (warningContext !== null) {
       toast.warn(warningContext.message);
       setShowWarningContext(true);
     } else {
+      setFinalSelection(await contextValue.manager.getSelection());
       openConfirmDialog();
     }
   }
 
   function confirmSelection() {
     if (contextValue === null) return;
-    setSubmitLoading(true);
+    setAwaitingConfirmation(true);
     fetch("/api/reserveSeats", {
       method: "POST",
       body: JSON.stringify({
-        "ids": contextValue.manager.selection,
+        "ids": finalSelection,
       })
     }).then(res => {
       if (res.ok) {
@@ -113,7 +125,13 @@ export default function Page() {
     }).catch((err: any) => {
       toast.warn(err.message);
     }).finally(() => {
-      setSubmitLoading(false);
+      // Tell others that the wait has ended, then process the pending warnings
+      setAwaitingConfirmation(false);
+      if (pendingWarnings.length > 0) {
+        contextValue.seatSelectionWarningsHandler(pendingWarnings);
+      }
+      setPendingWarnings([]);
+
       closeConfirmDialog();
     })
   }
@@ -176,7 +194,13 @@ export default function Page() {
       );
 
       const seatSelectionWarningsHandler = (warnings: UISeatSelectionWarning[]) => {
-        if (warnings.length > 0 && userPossiblyAfkRef.current) {
+        // When awaiting confirmation, don't interrupt the dialog; wait for it to finish
+        if (awaitingConfirmationRef.current) {
+          setPendingWarnings(arr => arr.concat(warnings));
+          return;
+        }
+
+        if (warnings.length > 0 && confirmDialogIsOpenRef.current) {
           toast.info("Your selection has been updated.");
           setShowWarningContext(true);
           closeConfirmDialog();
@@ -290,9 +314,9 @@ export default function Page() {
                       <p>{warningContext.message}</p>
                       {warningContext.error === "UNEXPECTED_NUM_OF_SEATS" ? (
                         <p>Missing:{" "}
-                          {(Array.from(warningContext.context.entries()) as Array<[string, number]>)
-                            .filter(([cat, count]) => count > 0)
-                            .map(([cat, count]) => `${count} seats of ${contextValue.categories.get(cat)!}`)
+                          {(warningContext.context as Array<[string, number]>)
+                            .filter(([_, count]) => count > 0)
+                            .map(([cat, count]) => `${count} seats of ${contextValue.categories.get(cat)!.label}`)
                             .join(", ")}
                         </p>
                       )
@@ -344,7 +368,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <Dialog open={confirmDialogIsOpen} onClose={submitLoading ? (() => {}) : closeConfirmDialog} className="relative z-10">
+      <Dialog open={confirmDialogIsOpen} onClose={awaitingConfirmation ? (() => {}) : closeConfirmDialog} className="relative z-10">
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center text-background text-center">
           <DialogPanel className="w-full max-w-[720px] min-h-2/3 m-8 flex flex-col items-center justify-center bg-[#EEEEEE] rounded-2xl">
@@ -353,10 +377,8 @@ export default function Page() {
               <div className="px-4 text-xs sm:text-sm font-light space-y-4">
                 <p>You are about to make a reservation for the following seats:</p>
                 <p className="text-base sm:text-lg font-semibold">{
-                  contextValue.manager.selection
-                    .map(id => contextValue.manager.seatMap.get(id)!)
-                    .map(seat => `${seat.label} (${levels.get(seat.level)!.label})`)
-                    .join(", ")
+                  finalSelection.map(id => contextValue.manager.seatMap.get(id)!)
+                    .map(seat => `${seat.label} (${levels.get(seat.level)!.label})`).join(", ")
                 }</p>
                 <p>Please check that your selection is correct. <span className="font-bold">You may not change your selection after confirming it.</span></p>
                 <p>Are you sure you want to proceed?</p>
@@ -365,11 +387,11 @@ export default function Page() {
                 <RegularButton
                   variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
                   onClick={confirmSelection}
-                  buttonProps={{ disabled: submitLoading }}
+                  buttonProps={{ disabled: awaitingConfirmation }}
                 >
                   <span className="text-base sm:text-lg font-medium">Confirm seats</span>
                 </RegularButton>
-                {submitLoading ? (
+                {awaitingConfirmation ? (
                   <p className="px-4 text-sm sm:text-base">Please wait, this may take a while...</p>
                 ) : (
                   <p className="px-4 text-sm sm:text-base">
