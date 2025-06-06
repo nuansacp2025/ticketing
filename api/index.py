@@ -47,6 +47,8 @@ def send_seat_confirmation():
             "seat_num": ", ".join(seats),
         }
     )
+    print(email_res.status_code)
+    print(email_res.content.decode('utf-8'))
     
     # TODO: error handling
     # Expected response:
