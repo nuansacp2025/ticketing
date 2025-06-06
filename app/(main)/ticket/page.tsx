@@ -16,8 +16,18 @@ export default function Page() {
   const openSeatView = () => { setSeatView(true) };
   const closeSeatView = () => { setSeatView(false) };
 
-  function handleLogout() {
-    // TODO
+  async function handleLogout() {
+    fetch("/api/logoutUser", {
+      method: "GET",
+      credentials: "include",
+    }).then(res => {
+      if (res.ok) {
+        router.push("/login");
+      }
+      else throw new Error("An unknown error occurred, please try again.")
+    }).catch((err: any) => {
+      console.log(err);
+    });
   }
 
   React.useEffect(() => {
