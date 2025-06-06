@@ -126,7 +126,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     for (let i = 0; i < ids.length; i++) {
       await updateDoc(seatRefs[i], { isAvailable: false, reservedBy: ticketId});
     }
-    await updateDoc(isAvailableCache, Object.fromEntries(ids.map(id => [id, true])));
+    await updateDoc(isAvailableCache, Object.fromEntries(ids.map(id => [id, false])));
     await updateDoc(ticketRef, { seatConfirmed: true });
   });
 }
