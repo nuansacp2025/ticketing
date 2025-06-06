@@ -42,8 +42,8 @@ export interface Seat {
         rot: number,
     }
     notSelectable?: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
-    leftId?: string,
-    rightId?: string,
+    leftId?: string | null,
+    rightId?: string | null,
 }
 
 export interface SeatMetadata {
@@ -57,8 +57,8 @@ export interface SeatMetadata {
         rot: number,
     }
     notSelectable: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
-    leftId: string,
-    rightId: string,
+    leftId: string | null,
+    rightId: string | null,
 }
 
 export async function getCustomer(id: string): Promise<Customer | null> {
@@ -240,8 +240,8 @@ export async function getSeatsMetadata(): Promise<SeatMetadata[]> {
             category: data.category,
             location: data.location,
             notSelectable: data.notSelectable,
-            leftId: data.leftId,
-            rightId: data.rightId,
+            leftId: data.leftId ?? null,
+            rightId: data.rightId ?? null,
         });
     });
 

@@ -37,7 +37,7 @@ def send_seat_confirmation():
         print(repr(e))
         return { "success": False, "message": "Fields `email`, `ticketCode`, and `seats` required" }, 400
 
-    send_email(
+    email_res = send_email(
         to_email=email,
         subject="NUANSA 2025 Seat Confirmation",
         template_name="seat_confirmation.html",
@@ -47,8 +47,14 @@ def send_seat_confirmation():
             "seat_num": ", ".join(seats),
         }
     )
-
+    print(email_res.status_code)
+    print(email_res.content.decode('utf-8'))
+    
     # TODO: error handling
+    # Expected response:
+    #   status: 200 OK
+    #   content (example): b'{"id":"<...@mail.nuansacp.org>","message":"Queued. Thank you."}\n'
+
     return { "success": True }, 200
 
 if __name__ == '__main__':
