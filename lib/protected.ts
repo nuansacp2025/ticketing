@@ -78,7 +78,7 @@ export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
 export async function setSeatsReserved(ids: string[], ticketId: string) {
   await runTransaction(db, async (transaction) => {
     const ticketRef = doc(db, "tickets", ticketId);
-    const ticketDoc = await getDoc(ticketRef);
+    const ticketDoc = await transaction.get(ticketRef);
     if (!ticketDoc.exists()) {
       throw new NotFoundError("Ticket not found");
     }
@@ -95,7 +95,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     };
     for (let i = 0; i < ids.length; i++) {
       const seatRef = seatRefs[i];
-      const seatDoc = await getDoc(seatRef);
+      const seatDoc = await transaction.get(seatRef);
       if (!seatDoc.exists()) {
         throw new NotFoundError(`Seat ${ids[i]} does not exist`);
       }
@@ -124,9 +124,9 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
 
     const isAvailableCache = doc(db, "caches", "seats.isAvailable");
     for (let i = 0; i < ids.length; i++) {
-      await updateDoc(seatRefs[i], { isAvailable: false, reservedBy: ticketId});
+      await transaction.update(seatRefs[i], { isAvailable: false, reservedBy: ticketId});
     }
-    await updateDoc(isAvailableCache, Object.fromEntries(ids.map(id => [id, false])));
-    await updateDoc(ticketRef, { seatConfirmed: true });
+    await transaction.update(isAvailableCache, Object.fromEntries(ids.map(id => [id, false])));
+    await transaction.update(ticketRef, { seatConfirmed: true });
   });
 }
