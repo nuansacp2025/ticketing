@@ -21,12 +21,8 @@ export interface UICategoryMetadata {
   style: {
     width: number,
     height: number,
-  },
-  themes: {
-    notSelectable: React.FC<{ children?: ReactNode }>,
-    taken: React.FC<{ children?: ReactNode }>,
-    selected: React.FC<{ children?: ReactNode }>,
-    default: React.FC<{ children?: ReactNode }>,
+    color: string,
+    shadowClass: string,
   },
 }
 

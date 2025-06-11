@@ -8,7 +8,7 @@ import { db } from "@/db/source";
 import { doc, onSnapshot } from "firebase/firestore";
 import React from "react";
 import { SeatMetadata } from "@/lib/db";
-import { UISeatMetadata, UISeatSelectionWarning, UISeatState } from "@/components/seating-plan/types";
+import { UICategoryMetadata, UISeatMetadata, UISeatSelectionWarning, UISeatState } from "@/components/seating-plan/types";
 import { useRouter } from "next/navigation";
 import { Profile } from "@/lib/protected";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -21,81 +21,36 @@ interface SeatSelectionWarningContext {
   context?: any,
 }
 
-function LegendSection() {
+function LegendSection({ categories }: { categories: Map<string, UICategoryMetadata> }) {
   return (
     <div className="grid grid-rows-4 sm:grid-rows-2 lg:grid-rows-4 grid-flow-col gap-2 text-xs sm:text-sm font-light">
       <div className="flex space-x-2 items-center">
-        <div className="w-5 h-5"><NotSelectableSeat /></div>
+        <div className="size-4 sm:size-5 bg-gray-500 outline-black outline-2"><NotSelectableSeat /></div>
         <p>Not for selection</p>
       </div>
       <div className="flex space-x-2 items-center">
-        <div className="w-5 h-5"><TakenSeat /></div>
+        <div className="size-4 sm:size-5 bg-red-900 outline-black outline-2"><TakenSeat /></div>
         <p>Already taken</p>
       </div>
       <div className="flex space-x-2 items-center">
-        <div className="w-5 h-5"><DefaultSeat /></div>
+        <div className="size-4 sm:size-5 bg-white outline-black outline-2"><DefaultSeat /></div>
         <p>Available</p>
       </div>
       <div className="flex space-x-2 items-center">
-        <div className="w-5 h-5"><SelectedSeat /></div>
+        <div className="size-4 sm:size-5 bg-blue-500 outline-black outline-2"><SelectedSeat /></div>
         <p>Selected</p>
       </div>
-      <div className="flex space-x-2 items-center">
-        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-        <p>Cat. A</p>
-      </div>
-      <div className="flex space-x-2 items-center">
-        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-        <p>Cat. B</p>
-      </div>
-      <div className="flex space-x-2 items-center">
-        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-        <p>Cat. C</p>
-      </div>
+      {Array.from(categories.entries()).map(([cat, data]) => (
+        <div key={cat} className="flex space-x-2 items-center">
+          <svg className="block w-5 h-5" width="20" height="20">
+            <circle cx="10" cy="10" r="10" fill={data.style.color} />
+          </svg>
+          <p>{data.label}</p>
+        </div>
+      ))}
     </div>
   );
 }
-
-/*
-function LegendSection() {
-  return (
-    <div className="flex space-x-4 text-xs sm:text-sm font-light">
-      <div className="space-y-2">
-        <div className="flex space-x-2 items-center">
-          <div className="w-5 h-5"><NotSelectableSeat /></div>
-          <p>Not for selection</p>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <div className="w-5 h-5"><TakenSeat /></div>
-          <p>Already taken</p>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <div className="w-5 h-5"><DefaultSeat /></div>
-          <p>Available</p>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <div className="w-5 h-5"><SelectedSeat /></div>
-          <p>Selected</p>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <div className="flex space-x-2 items-center">
-          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-          <p>Cat. A</p>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-          <p>Cat. B</p>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
-          <p>Cat. C</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-  */
 
 export default function Page() {
   const router = useRouter();
@@ -302,7 +257,6 @@ export default function Page() {
       setContextValue(getCustomerSeatingPlanContextValue(
         manager,
         seatSelectionWarningsHandler,
-        setRerender,
       ));
     }).catch((err: any) => {
       console.log(err);
@@ -360,7 +314,7 @@ export default function Page() {
               </div>
               <div className="lg:hidden p-2 bg-[#3E3E3E]/80 rounded-2xl">
                 <div className="w-full p-2">
-                  <LegendSection />
+                  <LegendSection categories={contextValue.categories} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="p-2 text-xs sm:text-sm">
@@ -383,7 +337,7 @@ export default function Page() {
         <div className={`${!sidebarIsOpen && "not-lg:hidden"} not-lg:absolute z-10 not-lg:inset-0 not-lg:bg-background/80 p-8 md:p-16 lg:p-0 lg:basis-1/4 flex flex-col space-y-6`}>
           <div className="not-lg:hidden space-y-4">
             <h3 className="text-xl font-semibold">Legend</h3>
-            <LegendSection />
+            <LegendSection categories={contextValue.categories} />
           </div>
           <div className="flex-1 flex flex-col space-y-4">
             <h3 className="text-xl font-semibold">Your Selection</h3>

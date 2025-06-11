@@ -31,7 +31,7 @@ export const TakenSeat = (props: { children?: ReactNode }) => {
 
 export const SelectedSeat = (props: { children?: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-blue-500 outline-black outline-2 transition-all duration-200 hover:shadow-[0px_0px_30px_10px] shadow-blue-500/80">
+    <div className="w-full h-full bg-blue-500 outline-black outline-2">
       {props.children}
     </div>
   );
@@ -39,46 +39,50 @@ export const SelectedSeat = (props: { children?: ReactNode }) => {
 
 export const DefaultSeat = (props: { children?: ReactNode }) => {
   return (
-    <div className="w-full h-full bg-white outline-black outline-2 transition-all duration-200 hover:shadow-[0px_0px_30px_10px] shadow-white/80">
+    <div className="w-full h-full bg-white outline-black outline-2">
       {props.children}
     </div>
   );
 };
 
-// TODO: apply slightly different styles to each category? (e.g. color)
-
-const categoryMetadata = {
-  style: {
-    width: 20,
-    height: 20,
-  },
-  themes: {
-    notSelectable: NotSelectableSeat,
-    taken: TakenSeat,
-    selected: SelectedSeat,
-    default: DefaultSeat,
-  },
+const categoryThemes = {
+  notSelectable: NotSelectableSeat,
+  taken: TakenSeat,
+  selected: SelectedSeat,
+  default: DefaultSeat,
 };
 
 const catA: UICategoryMetadata = {
   label: "Cat. A",
   description: "Level 1, Lines G-X",
-  style: categoryMetadata.style,
-  themes: categoryMetadata.themes,
+  style: {
+    width: 20,
+    height: 20,
+    color: "#9fcbdc",
+    shadowClass: "shadow-[0px_0px_30px_10px] shadow-[#9fcbdc]",
+  },
 };
 
 const catB: UICategoryMetadata = {
   label: "Cat. B",
   description: "Level 1, Lines AA-GG and LL",
-  style: categoryMetadata.style,
-  themes: categoryMetadata.themes,
+  style: {
+    width: 20,
+    height: 20,
+    color: "#ea709c",
+    shadowClass: "shadow-[0px_0px_30px_10px] shadow-[#ea709c]",
+  },
 };
 
 const catC: UICategoryMetadata = {
   label: "Cat. C",
   description: "Level 2",
-  style: categoryMetadata.style,
-  themes: categoryMetadata.themes,
+  style: {
+    width: 20,
+    height: 20,
+    color: "#fcf984",
+    shadowClass: "shadow-[0px_0px_30px_10px] shadow-[#fcf984]",
+  },
 };
 
 export const categories = new Map([
@@ -96,18 +100,36 @@ const SeatComponent = ({ id }: { id: string }) => {
   const manager = contextValue.manager;
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
+  const categoryMetadata = categories.get(seatMetadata.category)!;
+
+  const bgColorClass = seatMetadata.notSelectable ? "bg-gray-500"
+    : seatState.taken ? "bg-red-900"
+    : seatState.selected ? "bg-blue-500"
+    : "bg-white";
 
   return (
     <SeatWrapper key={id} id={id} context={CustomerSeatingPlanContext}>
-      <div className="relative w-full h-full flex items-center justify-center group">
-        {!seatMetadata.notSelectable &&
+      <div
+        className={`
+          relative w-full h-full outline-black outline-2 ${bgColorClass}
+          flex items-center justify-center group
+        `}
+      >
+        {seatMetadata.notSelectable ? (
+          <span className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <svg width="100%" height="100%" className="absolute inset-0">
+              <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" />
+              <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" />
+            </svg>
+          </span>
+        ) : (
           <span
             className={`
               text-xs text-background tracking-tighter
               ${!seatState.taken && "group-hover:scale-120 duration-200"}
             `}
           >{seatMetadata.label}</span>
-        }
+        )}
         {manager.isolatedSeatIds.includes(id) &&
           <span className="absolute -top-1.5 -right-1.5">
             <svg width="14" height="14" viewBox="0 0 14 14">
@@ -137,7 +159,6 @@ export const levels = new Map([
 export function getCustomerSeatingPlanContextValue(
     manager: CustomerSeatingPlanManager,
     seatSelectionWarningsHandler: (warnings: UISeatSelectionWarning[]) => Promise<void> | void,
-    setRerender: React.Dispatch<React.SetStateAction<number>>,
 ) {
   return {
     width: 1500,

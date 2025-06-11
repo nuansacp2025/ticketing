@@ -5,53 +5,61 @@ interface SeatComponentProps<T extends MType> {
   id: string,
   context: React.Context<SeatingPlanContextType<T> | null>,
   children?: ReactNode,
+  backgroundChildren?: ReactNode,
 }
 
-export function SeatWrapper<T extends MType>({ id, context, children }: SeatComponentProps<T>) {
-  const contextValue = React.useContext(context);
+export function SeatWrapper<T extends MType>(props: SeatComponentProps<T>) {
+  const contextValue = React.useContext(props.context);
   if (contextValue === null) {
     return <></>;  // parent should show loading
   }
 
   const manager = contextValue.manager;
 
-  const seatMetadata = manager.seatMap.get(id)!;
-  const seatState = manager.seatStateMap.get(id)!;
-  const seatCategory = contextValue.categories.get(seatMetadata.category)!
+  const seatMetadata = manager.seatMap.get(props.id)!;
+  const seatState = manager.seatStateMap.get(props.id)!;
+  const categoryMetadata = contextValue.categories.get(seatMetadata.category)!
 
-  const { width, height } = seatCategory.style;
-  const CurrentTheme = seatMetadata.notSelectable ? seatCategory.themes.notSelectable
-    : seatState.taken ? seatCategory.themes.taken
-    : seatState.selected ? seatCategory.themes.selected
-    : seatCategory.themes.default;
+  const { width, height } = categoryMetadata.style;
   
   async function handleSeatClick() {
     if (contextValue === null) return;
     if (seatMetadata.notSelectable || seatState.taken) return;
     if (seatState.selected) {
-      await manager.unselectSeat(id);
+      await manager.unselectSeat(props.id);
     } else {
-      const warnings = await manager.selectSeat(id);
+      const warnings = await manager.selectSeat(props.id);
       console.log(warnings)
       await contextValue.seatSelectionWarningsHandler(warnings);
     }
   }
   
   return (
-    <div
-      style={{
-        width, height, rotate: `${seatMetadata.location.rot}deg`,
-        position: "absolute",
-        display: (seatMetadata.level === manager.currentLevel ? "block" : "none"),
-        top: (seatMetadata.location.y - height/2),
-        left: (seatMetadata.location.x - width/2),
-      }}
-      onClick={handleSeatClick}
-    >
-      <CurrentTheme>
-        {children}
-      </CurrentTheme>
-    </div>
+    <>
+      <div
+        style={{
+          width, height, rotate: `${seatMetadata.location.rot}deg`,
+          position: "absolute", zIndex: 10,
+          display: (seatMetadata.level === manager.currentLevel ? "block" : "none"),
+          top: (seatMetadata.location.y - height/2),
+          left: (seatMetadata.location.x - width/2),
+        }}
+        onClick={handleSeatClick}
+      >
+        {props.children}
+      </div>
+      {/* TODO: refactor for reusability, not a very nice place to put this I think, but needed to prevent the shadow from blocking other seats */}
+      <div
+        className={categoryMetadata.style.shadowClass}
+        style={{
+          width, height, rotate: `${seatMetadata.location.rot}deg`,
+          position: "absolute", zIndex: 0,
+          display: (seatMetadata.level === manager.currentLevel ? "block" : "none"),
+          top: (seatMetadata.location.y - height/2),
+          left: (seatMetadata.location.x - width/2),
+        }}
+      />
+    </>
   );
 }
 
