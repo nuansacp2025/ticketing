@@ -26,6 +26,8 @@ export function CustomerSeatingPlanInterface(props: CustomerSeatingPlanInterface
     return <></>;  // parent should show loading
   }
 
+  const INITIAL_SCALE = 0.8;
+
   const [minimapVisible, setMinimapVisible] = React.useState(false);
   const showMinimap = () => setMinimapVisible(true);
   const hideMinimap = () => setMinimapVisible(false);
@@ -35,8 +37,12 @@ export function CustomerSeatingPlanInterface(props: CustomerSeatingPlanInterface
   return (
     <div className="absolute inset-0" >
       <TransformWrapper
-        initialScale={0.8} initialPositionX={-200} initialPositionY={0}
-        minScale={8/15} maxScale={1.5}
+        initialScale={INITIAL_SCALE} initialPositionY={0} minScale={0.5} maxScale={2.5}
+        onInit={ref => {
+          const frameWidth = ref.instance.wrapperComponent!.clientWidth;
+          const initContentWidth = ref.instance.contentComponent!.clientWidth * INITIAL_SCALE;
+          ref.state.positionX = (frameWidth - initContentWidth) / 2;
+        }}
         onZoomStart={showMinimap} onZoomStop={hideMinimap}
         onPanningStart={showMinimap} onPanningStop={hideMinimap}
         onPinchingStart={showMinimap} onPinchingStop={hideMinimap}
