@@ -84,8 +84,6 @@ export default function Page() {
   // This value is only updated every time `rerender` is updated
   const warningContext = assertFinalSelectionValid();
 
-  const [showWarningContext, setShowWarningContext] = React.useState(true);
-
   const confirmDialogIsOpenRef = React.useRef(false);
   confirmDialogIsOpenRef.current = confirmDialogIsOpen;
   const awaitingConfirmationRef = React.useRef(false);
@@ -132,7 +130,6 @@ export default function Page() {
     if (contextValue === null) return;
     if (warningContext !== null) {
       toast.warn(warningContext.message);
-      setShowWarningContext(true);
     } else {
       setFinalSelection(await contextValue.manager.getSelection());
       openConfirmDialog();
@@ -237,7 +234,6 @@ export default function Page() {
 
         if (warnings.length > 0 && confirmDialogIsOpenRef.current) {
           toast.info("Your selection has been updated.");
-          setShowWarningContext(true);
           closeConfirmDialog();
         }
 
@@ -376,7 +372,7 @@ export default function Page() {
             <div className="relative flex-1 outline-1 outline-[#EEEEEE] rounded-sm flex flex-col">
               <div className="absolute inset-2 space-y-2 text-xs sm:text-sm text-background overflow-auto scrollbar-hidden">
                 <p className="text-foreground">{selectionData.length ? `${selectionData.length} of ${profile!.catA + profile!.catB + profile!.catC} selected.` : "None selected."}</p>
-                {showWarningContext && warningContext && (selectionData.length > 0) &&
+                {warningContext && (selectionData.length > 0) &&
                   <div className="w-full p-2 flex space-x-2 rounded-xl bg-amber-300">
                     <div className="flex-1 space-y-1">
                       <p>{warningContext.message}</p>
