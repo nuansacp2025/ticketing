@@ -12,7 +12,7 @@ import { Seat } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export const SeatTable: React.FC<{ seats: Seat[] }> = ({ seats }) => {
+export const SeatTable: React.FC<{ seats: Record<string, Seat> }> = ({ seats }) => {
   const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
 
   const defaultColDef: GridOptions['defaultColDef'] = {
@@ -38,7 +38,7 @@ export const SeatTable: React.FC<{ seats: Seat[] }> = ({ seats }) => {
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
-        rowData={seats}
+        rowData={Object.values(seats)}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         onGridReady={gridOnReady}

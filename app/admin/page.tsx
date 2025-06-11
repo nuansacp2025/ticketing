@@ -16,6 +16,7 @@ import { JoinedTicketTable } from '@/components/admin/joined-ticket-table';
 import { JoinedSeatTable } from '@/components/admin/joined-seat-table';
 import { TicketCheckIn } from '@/components/admin/ticket-checkin';
 import { Customer, Seat, Ticket } from '@/lib/db';
+import { clearLocalStorage, updateData, useLocalStorage } from '@/app/local-storage';
 
 // register AG Grid community modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -32,11 +33,21 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Local storage keys
+  const localStorageKeys = {
+    lastUpdated: 'admin-lastCacheUpdate',
+    activeTab: 'admin-active-tab',
+    customers: 'customers',
+    tickets: 'tickets',
+    seats: 'seats',
+  };
+
   // Data state
-  const [activeTab, setActiveTab] = useState<Tab>('CheckIn');
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [seats, setSeats] = useState<Seat[]>([]);
+  const [lastUpdated, setLastUpdated] = useLocalStorage(localStorageKeys.lastUpdated, '');
+  const [activeTab, setActiveTab] = useLocalStorage<Tab>(localStorageKeys.activeTab, 'CheckIn');
+  const [customers, setCustomers] = useLocalStorage<Record<string, Customer>>(localStorageKeys.customers, {});
+  const [tickets, setTickets] = useLocalStorage<Record<string, Ticket>>(localStorageKeys.tickets, {});
+  const [seats, setSeats] = useLocalStorage<Record<string, Seat>>(localStorageKeys.seats, {});
 
   // Check if user is logged in
   useEffect(() => {
@@ -49,18 +60,36 @@ export default function AdminPage() {
   // Fetch data only when logged in
   useEffect(() => {
     if (!isLoggedIn) return;
-    fetch('/api/getAllCustomers')
-      .then(res => res.json())
-      .then((data: Record<string, Omit<Customer, 'id'>>) => setCustomers(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
-      .catch(console.error);
-    fetch('/api/getAllTickets')
-      .then(res => res.json())
-      .then((data: Record<string, Omit<Ticket, 'id'>>) => setTickets(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
-      .catch(console.error);
-    fetch('/api/getAllSeats')
-      .then(res => res.json())
-      .then((data: Record<string, Omit<Seat, 'id'>>) => setSeats(Object.entries(data).map(([id, v]) => ({ id, ...v }))))
-      .catch(console.error);
+    const getUpdatedCustomersUrl = new URL('/api/getUpdatedCustomers', window.location.origin);
+    const getUpdatedTicketsUrl = new URL('/api/getUpdatedTickets', window.location.origin);
+    const getUpdatedSeatsUrl = new URL('/api/getUpdatedSeats', window.location.origin);
+    if (lastUpdated) {
+      getUpdatedCustomersUrl.searchParams.set('since', lastUpdated);
+      getUpdatedTicketsUrl.searchParams.set('since', lastUpdated);
+      getUpdatedSeatsUrl.searchParams.set('since', lastUpdated);
+    }
+
+    Promise.all([
+      fetch('/api/getAllCustomers')
+        .then(res => res.json())
+        .then((data: Record<string, Customer>) => setCustomers(updateData<Customer>(customers, data)))
+        .catch(console.error),
+      fetch(getUpdatedCustomersUrl.toString())
+        .then(res => res.json())
+        .then((data: Record<string, Ticket>) => setTickets(updateData<Ticket>(tickets, data)))
+        .catch(console.error),
+      fetch(getUpdatedSeatsUrl.toString())
+        .then(res => res.json())
+        .then((data: Record<string, Seat>) => setSeats(updateData<Seat>(seats, data)))
+        .catch(console.error),
+    ]).then(() => {
+      console.log("Seats: ", seats);
+      setLastUpdated(new Date().toLocaleString());
+      setError(null);
+    }).catch(err => {
+      console.error('Error fetching data:', err);
+      setError('Failed to fetch data');
+    });
   }, [isLoggedIn]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -169,6 +198,24 @@ export default function AdminPage() {
         {activeTab === 'Seats' && <JoinedSeatTable tickets={tickets} customers={customers} seats={seats} />}
         {activeTab === 'Statistics' && <Stats customers={customers} tickets={tickets} seats={seats} />}
       </main>
+
+      <button
+        onClick={clearLocalStorage}
+        style={{
+          padding: '0.5rem 1rem',
+          background: 'transparent',
+          border: '1px solid #e6f2e6',
+          borderRadius: 4,
+          color: '#e6f2e6',
+          cursor: 'pointer',
+          fontSize: '0.9rem',
+          position: 'absolute',
+          top: 16,
+          right: 16,
+        }}
+      >
+        ⚙️ Clear Storage
+      </button>
     </div>
   );
 }

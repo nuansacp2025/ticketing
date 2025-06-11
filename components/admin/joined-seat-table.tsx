@@ -13,9 +13,9 @@ import { Customer, Seat, Ticket } from '@/lib/db';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export const JoinedSeatTable: React.FC<{
-  customers: Customer[];
-  tickets: Ticket[];
-  seats: Seat[];
+  customers: Record<string, Customer>;
+  tickets: Record<string, Ticket>;
+  seats: Record<string, Seat>;
 }> = ({ customers, tickets, seats }) => {
     const gridApi = useRef<GridApi | null>(null);
     const gridOnReady = (e: GridReadyEvent) => {
@@ -24,10 +24,10 @@ export const JoinedSeatTable: React.FC<{
     }
 
     const rowData = useMemo(() =>
-        seats.map(s => {
-            const ticket = tickets.find(t => t.id === s.reservedBy);
+        Object.values(seats).map(s => {
+            const ticket = s.reservedBy ? tickets[s.reservedBy] : undefined;
             const owner  = ticket
-                ? customers.find(c => c.ticketIds.includes(ticket.id))
+                ? Object.values(customers).find(c => c.ticketIds.includes(ticket.id))
                 : undefined;
 
             return {

@@ -10,27 +10,27 @@ import {
 } from 'recharts';
 
 interface StatsProps {
-  customers: Customer[];
-  tickets:   Ticket[];
-  seats:     Seat[];
+  customers: Record<string, Customer>;
+  tickets:   Record<string, Ticket>;
+  seats:     Record<string, Seat>;
 }
 
 // Palette: main green & neutral gray
 const COLORS = ['#66BB6A', '#EEEEEE', '#FFA500'];
 
 export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
-    const ticketMap = new Map<string, Ticket>(tickets.map(t => [t.id, t]));
-    const totalCustomers = customers.length;
-    const confirmedCustomers = customers.filter(c =>
+    const ticketMap = new Map<string, Ticket>(Object.entries(tickets).map(([id, ticket]) => [id, ticket]));
+    const totalCustomers = Object.keys(customers).length;
+    const confirmedCustomers = Object.values(customers).filter(c =>
         c.ticketIds.every(id => ticketMap.get(id)?.seatConfirmed)
     ).length;
 
-    const totalTickets = tickets.length;
-    const unconfirmedTickets = tickets.filter(t => !t.seatConfirmed).length;
-    const checkedInTickets = tickets.filter(t => t.checkedIn).length;
+    const totalTickets = Object.keys(tickets).length;
+    const unconfirmedTickets = Object.values(tickets).filter(t => !t.seatConfirmed).length;
+    const checkedInTickets = Object.values(tickets).filter(t => t.checkedIn).length;
 
-    const totalSeats = seats.length;
-    const reservedSeats = seats.filter(s => !s.isAvailable).length;
+    const totalSeats = Object.keys(seats).length;
+    const reservedSeats = Object.values(seats).filter(s => !s.isAvailable).length;
 
     const makeData = (data: number[], titles: string[], colors: string[]) => data.map((value, index) => ({
         name: titles[index],
