@@ -21,7 +21,12 @@ export async function GET(request: Request) {
 
   try {
     const customers = await getCustomersQuery(queryFilters);
-    return NextResponse.json(customers);
+    const maxUpdatedMillis = Object.values(customers).map(customer => customer.lastUpdated?.toMillis() || 0).reduce((a, b) => Math.max(a, b), 0);
+    const maxUpdatedDate = new Date(maxUpdatedMillis);
+    return NextResponse.json({
+      "customers": customers,
+      "lastUpdated": maxUpdatedDate.toISOString()
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch seats' }, { status: 500 });
   }

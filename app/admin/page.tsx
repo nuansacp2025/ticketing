@@ -33,21 +33,12 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Local storage keys
-  const localStorageKeys = {
-    lastUpdated: 'admin-lastCacheUpdate',
-    activeTab: 'admin-active-tab',
-    customers: 'customers',
-    tickets: 'tickets',
-    seats: 'seats',
-  };
-
   // Data state
-  const [lastUpdated, setLastUpdated] = useLocalStorage(localStorageKeys.lastUpdated, '');
-  const [activeTab, setActiveTab] = useLocalStorage<Tab>(localStorageKeys.activeTab, 'CheckIn');
-  const [customers, setCustomers] = useLocalStorage<Record<string, Customer>>(localStorageKeys.customers, {});
-  const [tickets, setTickets] = useLocalStorage<Record<string, Ticket>>(localStorageKeys.tickets, {});
-  const [seats, setSeats] = useLocalStorage<Record<string, Seat>>(localStorageKeys.seats, {});
+  const [lastUpdated, setLastUpdated] = useLocalStorage('admin-lastCacheUpdate', '');
+  const [activeTab, setActiveTab] = useLocalStorage<Tab>('admin-active-tab', 'CheckIn');
+  const [customers, setCustomers] = useLocalStorage<Record<string, Customer>>('customers', {});
+  const [tickets, setTickets] = useLocalStorage<Record<string, Ticket>>('tickets', {});
+  const [seats, setSeats] = useLocalStorage<Record<string, Seat>>('seats', {});
 
   // Check if user is logged in
   useEffect(() => {
@@ -69,22 +60,34 @@ export default function AdminPage() {
       getUpdatedSeatsUrl.searchParams.set('since', lastUpdated);
     }
 
+    let lastUpdatedCustomers = 0;
+    let lastUpdatedTickets = 0;
+    let lastUpdatedSeats = 0;
+
     Promise.all([
-      fetch('/api/getAllCustomers')
-        .then(res => res.json())
-        .then((data: Record<string, Customer>) => setCustomers(updateData<Customer>(customers, data)))
-        .catch(console.error),
       fetch(getUpdatedCustomersUrl.toString())
         .then(res => res.json())
-        .then((data: Record<string, Ticket>) => setTickets(updateData<Ticket>(tickets, data)))
+        .then((payload: { lastUpdated: string, customers: Record<string, Customer> }) => {
+          setCustomers(updateData<Customer>(customers, payload.customers));
+          lastUpdatedCustomers = new Date(payload.lastUpdated).getTime();
+        })
+        .catch(console.error),
+      fetch(getUpdatedTicketsUrl.toString())
+        .then(res => res.json())
+        .then((payload: { lastUpdated: string, tickets: Record<string, Ticket> }) => {
+          setTickets(updateData<Ticket>(tickets, payload.tickets));
+          lastUpdatedTickets = new Date(payload.lastUpdated).getTime();
+        })
         .catch(console.error),
       fetch(getUpdatedSeatsUrl.toString())
         .then(res => res.json())
-        .then((data: Record<string, Seat>) => setSeats(updateData<Seat>(seats, data)))
+        .then((payload: { lastUpdated: string, seats: Record<string, Seat> }) => {
+          setSeats(updateData<Seat>(seats, payload.seats));
+          lastUpdatedSeats = new Date(payload.lastUpdated).getTime();
+        })
         .catch(console.error),
     ]).then(() => {
-      console.log("Seats: ", seats);
-      setLastUpdated(new Date().toLocaleString());
+      setLastUpdated(new Date(Math.max(lastUpdatedCustomers, lastUpdatedTickets, lastUpdatedSeats)).toISOString());
       setError(null);
     }).catch(err => {
       console.error('Error fetching data:', err);
