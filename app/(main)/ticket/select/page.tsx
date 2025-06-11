@@ -21,6 +21,82 @@ interface SeatSelectionWarningContext {
   context?: any,
 }
 
+function LegendSection() {
+  return (
+    <div className="grid grid-rows-4 sm:grid-rows-2 lg:grid-rows-4 grid-flow-col gap-2 text-xs sm:text-sm font-light">
+      <div className="flex space-x-2 items-center">
+        <div className="w-5 h-5"><NotSelectableSeat /></div>
+        <p>Not for selection</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="w-5 h-5"><TakenSeat /></div>
+        <p>Already taken</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="w-5 h-5"><DefaultSeat /></div>
+        <p>Available</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="w-5 h-5"><SelectedSeat /></div>
+        <p>Selected</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+        <p>Cat. A</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+        <p>Cat. B</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+        <p>Cat. C</p>
+      </div>
+    </div>
+  );
+}
+
+/*
+function LegendSection() {
+  return (
+    <div className="flex space-x-4 text-xs sm:text-sm font-light">
+      <div className="space-y-2">
+        <div className="flex space-x-2 items-center">
+          <div className="w-5 h-5"><NotSelectableSeat /></div>
+          <p>Not for selection</p>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <div className="w-5 h-5"><TakenSeat /></div>
+          <p>Already taken</p>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <div className="w-5 h-5"><DefaultSeat /></div>
+          <p>Available</p>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <div className="w-5 h-5"><SelectedSeat /></div>
+          <p>Selected</p>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="flex space-x-2 items-center">
+          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+          <p>Cat. A</p>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+          <p>Cat. B</p>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <svg className="block w-5 h-5" width="20" height="20"><circle cx="10" cy="10" r="10" fill="#000000" /></svg>
+          <p>Cat. C</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+  */
+
 export default function Page() {
   const router = useRouter();
 
@@ -39,6 +115,10 @@ export default function Page() {
   const [confirmDialogIsOpen, setConfirmDialogIsOpen] = React.useState(false);
   const openConfirmDialog = () => { setConfirmDialogIsOpen(true) };
   const closeConfirmDialog = () => { setConfirmDialogIsOpen(false) };
+
+  const [sidebarIsOpen, setSidebarIsOpen] = React.useState(true);
+  const openSidebar = () => { setSidebarIsOpen(true) };
+  const closeSidebar = () => { setSidebarIsOpen(false) };
 
   // Set to true when request to reserve seats is sent and is awaiting for response
   const [awaitingConfirmation, setAwaitingConfirmation] = React.useState(false);
@@ -253,55 +333,57 @@ export default function Page() {
   const levelEntries = Array.from(contextValue.levels.entries());
   const categoryEntries = Array.from(contextValue.categories.entries());
 
+  const currentLevel = contextValue.manager.currentLevel;
   const selectionData = contextValue.manager.selection
     .map(id => contextValue.manager.seatMap.get(id)!)
     .map(data => ({ category: data.category, level: data.level, label: data.label }));
 
   return (
     <CustomerSeatingPlanContext.Provider value={contextValue}>
-      <div className="flex w-[1200px] h-[600px]">
-        <div className="w-[800px] h-full">
-          <CustomerSeatingPlanInterface />
+      <div className="relative flex lg:space-x-4 w-full h-full lg:max-w-[1320px] lg:max-h-[720px] md:p-8 lg:p-16">
+        <div className="relative not-lg:basis-full lg:basis-3/4 outline-4 outline-[#3E3E3E] bg-[#EEEEEE] md:rounded-md">
+          <CustomerSeatingPlanInterface level={currentLevel}>
+            <div className={`${sidebarIsOpen && "not-lg:hidden"} absolute bottom-4 left-4 right-4 grid grid-cols-[1fr] md:grid-cols-[auto_1fr] grid-flow-row justify-end gap-4 pointer-events-none`}>
+              <div className="flex h-10 sm:h-12 p-1 sm:p-2 bg-[#3E3E3E]/80 rounded-2xl sm:rounded-3xl place-self-end pointer-events-auto">
+                {levelEntries.map(([level, data]) => (
+                  <div
+                    key={level}
+                    className={`
+                      cursor-pointer h-full px-2 flex flex-col justify-center rounded-xl sm:rounded-2xl
+                      ${currentLevel === level && "bg-[#222222] font-semibold"}
+                    `}
+                    onClick={() => contextValue.manager.setCurrentLevel(level)}
+                  >
+                    <p className="text-sm sm:text-base">{data.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="lg:hidden p-2 bg-[#3E3E3E]/80 rounded-2xl">
+                <div className="w-full p-2">
+                  <LegendSection />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="p-2 text-xs sm:text-sm">
+                    <p>{selectionData.length ? `${selectionData.length} of ${profile!.catA + profile!.catB + profile!.catC} selected.` : "None selected."}</p>
+                    {warningContext && (selectionData.length > 0) &&
+                      <p className="text-amber-300">There are issues with your selection.</p>
+                    }
+                  </div>
+                  <div className="pointer-events-auto">
+                    <RegularButton variant="white" buttonClass="w-[120px] p-2 rounded-2xl" onClick={openSidebar}>
+                      <span className="px-1 text-sm sm:text-base font-medium">Show all</span>
+                    </RegularButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CustomerSeatingPlanInterface>
         </div>
-        <div className="m-4 w-full flex flex-col space-y-6">
-          <div className="space-y-4">
+        {/* "Sidebar", visible on large screens, otherwise need to open */}
+        <div className={`${!sidebarIsOpen && "not-lg:hidden"} not-lg:absolute z-10 not-lg:inset-0 not-lg:bg-background/80 p-8 md:p-16 lg:p-0 lg:basis-1/4 flex flex-col space-y-6`}>
+          <div className="not-lg:hidden space-y-4">
             <h3 className="text-xl font-semibold">Legend</h3>
-            <div className="flex space-x-6 text-sm font-light">
-              <div className="space-y-2">
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <NotSelectableSeat />
-                  </div>
-                  <p>Not for selection</p>
-                </div>
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <TakenSeat />
-                  </div>
-                  <p>Already taken</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <DefaultSeat />
-                  </div>
-                  <p>Available</p>
-                </div>
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <SelectedSeat />
-                  </div>
-                  <p>Selected</p>
-                </div>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold">Seat Category</h3>
-            <div className="space-x-2 text-sm font-light">
-              <p>Cat. A: Level 1, Lines G-X</p>
-              <p>Cat. B: Level 1, Lines AA-GG and LL</p>
-              <p>Cat. C: Level 2</p>
-            </div>
+            <LegendSection />
           </div>
           <div className="flex-1 flex flex-col space-y-4">
             <h3 className="text-xl font-semibold">Your Selection</h3>
@@ -357,6 +439,14 @@ export default function Page() {
                 })}
               </div>
             </div>
+            <div className="w-full lg:hidden">
+              <RegularButton
+                variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
+                onClick={closeSidebar}
+              >
+                <span className="text-sm sm:text-base font-medium">Back to map</span>
+              </RegularButton>
+            </div>
             <div className="w-full">
               <RegularButton
                 variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
@@ -372,9 +462,9 @@ export default function Page() {
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center text-background text-center">
           <DialogPanel className="w-full max-w-[720px] min-h-2/3 m-8 flex flex-col items-center justify-center bg-[#EEEEEE] rounded-2xl">
-            <div className="h-full max-h-[540px] m-12 sm:m-24 flex flex-col items-center justify-between space-y-8">
-              <DialogTitle className="px-4 text-2xl sm:text-3xl font-medium">Confirm selection?</DialogTitle>
-              <div className="px-4 text-xs sm:text-sm font-light space-y-4">
+            <div className="h-full max-h-[540px] m-8 sm:m-24 flex flex-col items-center justify-between space-y-8">
+              <DialogTitle className="sm:px-4 text-2xl sm:text-3xl font-medium">Confirm selection?</DialogTitle>
+              <div className="sm:px-4 text-xs sm:text-sm font-light space-y-4">
                 <p>You are about to make a reservation for the following seats:</p>
                 <p className="text-base sm:text-lg font-semibold">{
                   finalSelection.map(id => contextValue.manager.seatMap.get(id)!)
@@ -392,9 +482,9 @@ export default function Page() {
                   <span className="text-base sm:text-lg font-medium">Confirm seats</span>
                 </RegularButton>
                 {awaitingConfirmation ? (
-                  <p className="px-4 text-sm sm:text-base">Please wait, this may take a while...</p>
+                  <p className="sm:px-4 text-sm sm:text-base">Please wait, this may take a while...</p>
                 ) : (
-                  <p className="px-4 text-sm sm:text-base">
+                  <p className="sm:px-4 text-sm sm:text-base">
                     <InlineButton onClick={closeConfirmDialog}>
                       No, I want to change my selection.
                     </InlineButton>

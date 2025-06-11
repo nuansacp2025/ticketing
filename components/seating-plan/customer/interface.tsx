@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -15,53 +15,54 @@ export type CustomerContextValue = SeatingPlanContextType<CustomerSeatingPlanMan
 
 export const CustomerSeatingPlanContext = React.createContext<CustomerContextValue>(null);
 
-export function CustomerSeatingPlanInterface() {
+interface CustomerSeatingPlanInterfaceProps {
+  level: string,
+  children: ReactNode,
+}
+
+export function CustomerSeatingPlanInterface(props: CustomerSeatingPlanInterfaceProps) {
   const contextValue = React.useContext(CustomerSeatingPlanContext);
   if (contextValue === null) {
     return <></>;  // parent should show loading
   }
 
+  const [minimapVisible, setMinimapVisible] = React.useState(false);
+  const showMinimap = () => setMinimapVisible(true);
+  const hideMinimap = () => setMinimapVisible(false);
+
   const levelEntries = Array.from(contextValue.levels.entries());
-  const currentLevel = contextValue.manager.currentLevel;
 
   return (
-    <div className="relative w-full h-full flex outline-4 outline-[#3E3E3E] rounded-md bg-[#EEEEEE]">
-      <TransformWrapper initialScale={0.8} initialPositionX={-200} initialPositionY={0} minScale={8/15} maxScale={1.5}>
+    <div className="absolute inset-0" >
+      <TransformWrapper
+        initialScale={0.8} initialPositionX={-200} initialPositionY={0}
+        minScale={8/15} maxScale={1.5}
+        onZoomStart={showMinimap} onZoomStop={hideMinimap}
+        onPanningStart={showMinimap} onPanningStop={hideMinimap}
+        onPinchingStart={showMinimap} onPinchingStop={hideMinimap}
+      >
         <TransformComponent wrapperStyle={{ maxWidth: "100%", maxHeight: "100%" }}>
           <SeatingPlan context={CustomerSeatingPlanContext}>
             {levelEntries.map(([level, data]) => (
               <object
                 key={level}
                 data={data.levelSvgUrl}
-                className= {`pointer-events-none relative -z-10 ${currentLevel !== level && "hidden"}`} 
+                className= {`pointer-events-none relative -z-10 ${props.level !== level && "hidden"}`} 
               />
             ))}
           </SeatingPlan>
         </TransformComponent>
-        <div className="absolute top-6 right-6">
-          <MiniMap width={240} className="rounded-sm outline-[#3E3E3E] outline-2">
+        <div className={`${!minimapVisible && "hidden"} absolute top-4 right-4 pointer-events-none`}>
+          <MiniMap width={120} className="rounded-sm outline-[#3E3E3E] outline-2">
             {levelEntries.map(([level, data]) => (
-              <Image key={level} fill src={data.levelMinimapImgUrl} alt={`Minimap (${data.label})`} className={`${currentLevel !== level && "hidden"}`} />
+              <Image key={level} fill src={data.levelMinimapImgUrl} alt={`Minimap (${data.label})`} className={`${props.level !== level && "hidden"}`} />
             ))}
           </MiniMap>
         </div>
-        <div className="absolute bottom-6 right-6">
-          <div className="flex h-12 p-2 bg-[#3E3E3E] rounded-3xl">
-            {levelEntries.map(([level, data]) => (
-              <div
-                key={level}
-                className={`
-                  cursor-pointer h-full px-2 flex flex-col justify-center rounded-2xl
-                  ${currentLevel === level && "bg-[#222222] font-semibold"}
-                `}
-                onClick={() => contextValue.manager.setCurrentLevel(level)}
-              >
-                <p>{data.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </TransformWrapper>
+      <div className="relative inset-0 z-10">
+        {props.children}
+      </div>
     </div>
   );
 }
