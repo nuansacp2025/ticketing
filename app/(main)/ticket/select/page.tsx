@@ -320,7 +320,13 @@ export default function Page() {
                   <div className="p-2 text-xs sm:text-sm">
                     <p>{selectionData.length ? `${selectionData.length} of ${profile!.catA + profile!.catB + profile!.catC} selected.` : "None selected."}</p>
                     {warningContext && (selectionData.length > 0) &&
-                      <p className="text-amber-300">There are issues with your selection.</p>
+                      <p className="text-amber-300">
+                        {warningContext.error === "UNEXPECTED_NUM_OF_SEATS" ? (
+                          `${warningContext.context.length} seats remaining.`
+                        ) : (
+                          "There are issues with your selection."
+                        )}
+                      </p>
                     }
                   </div>
                   <div className="pointer-events-auto">
