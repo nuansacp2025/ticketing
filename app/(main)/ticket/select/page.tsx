@@ -329,6 +329,32 @@ export default function Page() {
                     </RegularButton>
                   </div>
                 </div>
+                <div className="w-full p-2 flex space-x-2 items-center">
+                  <span className="inline-block">
+                    {/* https://reactsvgicons.com/ */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="1.5em"
+                      height="1.5em"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4"
+                      ></path>
+                    </svg>
+                  </span>{" "}
+                  <p className="text-sm sm:text-base">
+                    Need assistance? Contact us via WhatsApp:{" "}
+                    <span className="underline font-semibold">
+                      Kacey (+62 811 3114 001)
+                    </span>{" "}
+                    or{" "}
+                    <span className="underline font-semibold">
+                      Michelle (+65 8264 0091)
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           </CustomerSeatingPlanInterface>
@@ -411,6 +437,32 @@ export default function Page() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="not-lg:hidden absolute bottom-4 right-4 flex space-x-2 items-center">
+        <span className="inline-block">
+          {/* https://reactsvgicons.com/ */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1.5em"
+            height="1.5em"
+          >
+            <path
+              fill="currentColor"
+              d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4"
+            ></path>
+          </svg>
+        </span>{" "}
+        <p className="text-sm sm:text-base">
+          Need assistance? Contact us via WhatsApp:{" "}
+          <span className="underline font-semibold">
+            Kacey (+62 811 3114 001)
+          </span>{" "}
+          or{" "}
+          <span className="underline font-semibold">
+            Michelle (+65 8264 0091)
+          </span>
+        </p>
       </div>
       <Dialog open={confirmDialogIsOpen} onClose={awaitingConfirmation ? (() => {}) : closeConfirmDialog} className="relative z-10">
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
