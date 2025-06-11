@@ -26,7 +26,7 @@ export function CustomerSeatingPlanInterface(props: CustomerSeatingPlanInterface
     return <></>;  // parent should show loading
   }
 
-  const INITIAL_SCALE = 0.8;
+  const INITIAL_SCALE = 1;
 
   const [minimapVisible, setMinimapVisible] = React.useState(false);
   const showMinimap = () => setMinimapVisible(true);

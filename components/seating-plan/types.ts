@@ -173,3 +173,11 @@ export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
   seatSelectionWarningsHandler: (warnings: UISeatSelectionWarning[]) => Promise<void> | void,
   SeatComponent: React.FC<{ id: string }>,
 }
+
+export const SeatingPlanTransformContext = React.createContext<SeatingPlanTransformContextType>({
+  showSeatLabel: false,
+});
+
+export interface SeatingPlanTransformContextType {
+  showSeatLabel: boolean,
+}

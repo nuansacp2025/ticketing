@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { UISeatState, UISeatMetadata, SeatingPlanContextType, UICategoryMetadata, UISeatSelectionWarning } from "../types";
+import { UISeatState, UISeatMetadata, SeatingPlanContextType, UICategoryMetadata, UISeatSelectionWarning, SeatingPlanTransformContext } from "../types";
 import { SeatWrapper } from "../seating-plan";
 import { CustomerSeatingPlanManager } from "./types";
 import { CustomerSeatingPlanContext } from "./interface";
@@ -97,6 +97,8 @@ const SeatComponent = ({ id }: { id: string }) => {
     return <></>;  // parent should show loading
   }
 
+  const transformContextValue = React.useContext(SeatingPlanTransformContext);
+
   const manager = contextValue.manager;
   const seatMetadata = manager.seatMap.get(id)!;
   const seatState = manager.seatStateMap.get(id)!;
@@ -115,21 +117,22 @@ const SeatComponent = ({ id }: { id: string }) => {
           flex items-center justify-center group
         `}
       >
-        {seatMetadata.notSelectable ? (
+        {seatMetadata.notSelectable &&
           <span className="pointer-events-none absolute inset-0" aria-hidden="true">
             <svg width="100%" height="100%" className="absolute inset-0">
               <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" />
               <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" />
             </svg>
           </span>
-        ) : (
+        }
+        {!seatMetadata.notSelectable && transformContextValue.showSeatLabel &&
           <span
             className={`
-              text-xs text-background tracking-tighter
+              text-[8px] text-background tracking-tighter
               ${!seatState.taken && "group-hover:scale-120 duration-200"}
             `}
           >{seatMetadata.label}</span>
-        )}
+        }
         {manager.isolatedSeatIds.includes(id) &&
           <span className="absolute -top-1.5 -right-1.5">
             <svg width="14" height="14" viewBox="0 0 14 14">

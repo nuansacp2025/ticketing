@@ -1,14 +1,14 @@
 import React, { ReactNode } from "react";
-import { BaseSeatingPlanManager as MType, SeatingPlanContextType, UISeatSelectionWarning } from "./types";
+import { BaseSeatingPlanManager as MType, SeatingPlanContextType, SeatingPlanTransformContext, SeatingPlanTransformContextType } from "./types";
+import { useTransformEffect } from "react-zoom-pan-pinch";
 
-interface SeatComponentProps<T extends MType> {
+interface SeatWrapperProps<T extends MType> {
   id: string,
   context: React.Context<SeatingPlanContextType<T> | null>,
   children?: ReactNode,
-  backgroundChildren?: ReactNode,
 }
 
-export function SeatWrapper<T extends MType>(props: SeatComponentProps<T>) {
+export function SeatWrapper<T extends MType>(props: SeatWrapperProps<T>) {
   const contextValue = React.useContext(props.context);
   if (contextValue === null) {
     return <></>;  // parent should show loading
@@ -63,19 +63,44 @@ export function SeatWrapper<T extends MType>(props: SeatComponentProps<T>) {
   );
 }
 
-export function SeatingPlan<T extends MType>({ context, children }: { context: React.Context<SeatingPlanContextType<T> | null>, children: ReactNode }) {
+interface SeatingPlanProps<T extends MType> {
+  context: React.Context<SeatingPlanContextType<T> | null>,
+  children: ReactNode,
+}
+
+export function SeatingPlan<T extends MType>({ context, children }: SeatingPlanProps<T>) {
   const contextValue = React.useContext(context);
   if (contextValue === null) {
     return (
       <div>Loading...</div>
     );
   }
+
+  const [transformContextValue, setTransformContextValue] = React.useState<SeatingPlanTransformContextType>({
+    showSeatLabel: false,
+  });
+
+  useTransformEffect(({ state }) => {
+    if (state.scale >= 1 && !transformContextValue.showSeatLabel) {
+      setTransformContextValue(value => {
+        value.showSeatLabel = true;
+        return value;
+      });
+    } else if (state.scale < 1 && transformContextValue.showSeatLabel) {
+      setTransformContextValue(value => {
+        value.showSeatLabel = false;
+        return value;
+      });
+    }
+  })
   
   return (
-    <div style={{ width: contextValue.width, height: contextValue.height }}>
-      {Array.from(contextValue.manager.seatMap.keys())
-        .map(id => <contextValue.SeatComponent key={id} id={id} />)}
-      {children}
-    </div>
+    <SeatingPlanTransformContext.Provider value={transformContextValue}>
+      <div style={{ width: contextValue.width, height: contextValue.height }}>
+        {Array.from(contextValue.manager.seatMap.keys())
+          .map(id => <contextValue.SeatComponent key={id} id={id} />)}
+        {children}
+      </div>
+    </SeatingPlanTransformContext.Provider>
   );
 }
