@@ -125,6 +125,6 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
       await transaction.update(seatRefs[i], { isAvailable: false, reservedBy: ticketId, lastUpdated: Timestamp.now() });
     }
     await transaction.update(isAvailableCache, Object.fromEntries(ids.map(id => [id, false])));
-    await transaction.update(ticketRef, { seatConfirmed: true });
+    await transaction.update(ticketRef, { seatConfirmed: true, lastUpdated: Timestamp.now() });
   });
 }
