@@ -12,7 +12,7 @@ import { Ticket } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export const TicketTable: React.FC<{ tickets: Ticket[] }> = ({ tickets }) => {
+export const TicketTable: React.FC<{ tickets: Record<string, Ticket> }> = ({ tickets }) => {
   const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
 
   const defaultColDef: GridOptions['defaultColDef'] = {
@@ -39,7 +39,7 @@ export const TicketTable: React.FC<{ tickets: Ticket[] }> = ({ tickets }) => {
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
-        rowData={tickets}
+        rowData={Object.values(tickets)}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         onGridReady={gridOnReady}

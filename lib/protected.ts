@@ -1,11 +1,9 @@
 import { getCustomerByTicketId, getSeats, getSeatsQuery, getTicket, getTicketByCode, SeatMetadata } from "./db";
 import {
-    collection,
-    getDocs,
     doc,
-    getDoc,
     updateDoc,
     runTransaction,
+    Timestamp,
 } from 'firebase/firestore';
 import { db } from "@/db/source";
 import { BadRequestError, ConflictError, NotFoundError } from "./error";
@@ -55,7 +53,7 @@ export async function updateCheckedInStatus(ticketCode: string) {
     const seats = await getSeatsQuery({ reservedBy: ticket.id });
 
     const ticketRef = doc(db, "tickets", ticket.id);
-    await updateDoc(ticketRef, { checkedIn: true });
+    await updateDoc(ticketRef, { checkedIn: true, lastUpdated: Timestamp.now() });
     return seats;
 }
 
@@ -110,7 +108,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     // Normally this should be empty as user has no way to reserve more than once.
     // But we check this in case a ticket is partially filled by an admin in the database.
     const existingReservedSeatsSnap = await getSeatsQuery({ reservedBy: ticketId });
-    for (const seat of existingReservedSeatsSnap) {
+    for (const seat of Object.values(existingReservedSeatsSnap)) {
       counts[seat.category]++;
     }
 
@@ -124,9 +122,9 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
 
     const isAvailableCache = doc(db, "caches", "seats.isAvailable");
     for (let i = 0; i < ids.length; i++) {
-      await transaction.update(seatRefs[i], { isAvailable: false, reservedBy: ticketId});
+      await transaction.update(seatRefs[i], { isAvailable: false, reservedBy: ticketId, lastUpdated: Timestamp.now() });
     }
     await transaction.update(isAvailableCache, Object.fromEntries(ids.map(id => [id, false])));
-    await transaction.update(ticketRef, { seatConfirmed: true });
+    await transaction.update(ticketRef, { seatConfirmed: true, lastUpdated: Timestamp.now() });
   });
 }

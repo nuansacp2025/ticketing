@@ -13,7 +13,7 @@ import { Customer } from '@/lib/db';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }) => {
+export const CustomerTable: React.FC<{ customers: Record<string, Customer> }> = ({ customers }) => {
   const gridApi = useRef<GridApi | null>(null);
   const gridOnReady = (e: GridReadyEvent) => {
     gridApi.current = e.api;
@@ -51,7 +51,7 @@ export const CustomerTable: React.FC<{ customers: Customer[] }> = ({ customers }
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
-        rowData={customers}
+        rowData={Object.values(customers)}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         onGridReady={gridOnReady}

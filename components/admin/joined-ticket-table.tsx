@@ -13,8 +13,8 @@ import { Customer, Ticket } from '@/lib/db';
 ModuleRegistry.registerModules([ AllCommunityModule ]);
 
 export const JoinedTicketTable: React.FC<{
-  customers: Customer[];
-  tickets:   Ticket[];
+  customers: Record<string, Customer>;
+  tickets:   Record<string, Ticket>;
 }> = ({ customers, tickets }) => {
     const gridApi = useRef<GridApi | null>(null);
     const gridOnReady = (e: GridReadyEvent) => {
@@ -22,8 +22,8 @@ export const JoinedTicketTable: React.FC<{
         e.api.sizeColumnsToFit();
     }
     // Join tickets, customer, seat
-    const rowData = useMemo(() => tickets.map(t => {
-        const owner = customers.find(c => c.ticketIds.includes(t.id));
+    const rowData = useMemo(() => Object.values(tickets).map(t => {
+        const owner = Object.entries(customers).find(([_, c]) => c.ticketIds.includes(t.id))?.[1];
         
         return {
             ticketId:      t.id,
