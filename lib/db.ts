@@ -16,6 +16,12 @@ export interface Customer {
     email: string,
     ticketIds: string[],
     lastUpdated?: Timestamp,  // last time this customer was updated
+
+    // Relevant to cron job/email sending
+    createdAt?: Timestamp,
+    purchaseConfirmationSent?: boolean,
+    confirmedAt?: Timestamp,
+    seatConfirmationSent?: boolean,
 }
 
 export interface Ticket {
