@@ -53,7 +53,7 @@ export async function updateCheckedInStatus(ticketCode: string) {
     const seats = await getSeatsQuery({ reservedBy: ticket.id });
 
     const ticketRef = doc(db, "tickets", ticket.id);
-    await updateDoc(ticketRef, { checkedIn: true });
+    await updateDoc(ticketRef, { checkedIn: true, lastUpdated: Timestamp.now() });
     return seats;
 }
 
