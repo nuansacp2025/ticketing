@@ -6,6 +6,7 @@ import { API_CREDS_INTERNAL_USE_ONLY, PYTHON_API_URL, VERCEL_PROTECTION_BYPASS }
 import { verify } from "@/lib/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/db/source";
+import { getSeatsQuery } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
     await setSeatsReserved(body.ids, ticketId);
 
     const profile = await getMyProfile(ticketId);
+    const reservedSeats = await getSeatsQuery({ reservedBy: ticketId });
     const emailResponse = await fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
       method: "POST",
       headers: {
@@ -28,9 +30,8 @@ export async function POST(request: NextRequest) {
         "X-Internal-API-Credentials": API_CREDS_INTERNAL_USE_ONLY,
       },
       body: JSON.stringify({
-        email: profile!.email,
-        ticketCode: profile!.ticketCode,
-        seats: body.ids,
+        profile,
+        seats: Object.values(reservedSeats),
       }),
     });
 
