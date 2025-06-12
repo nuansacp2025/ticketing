@@ -8,7 +8,7 @@ import { db } from "@/db/source";
 import { doc, onSnapshot } from "firebase/firestore";
 import React from "react";
 import { SeatMetadata } from "@/lib/db";
-import { UISeatMetadata, UISeatSelectionWarning, UISeatState } from "@/components/seating-plan/types";
+import { UICategoryMetadata, UISeatMetadata, UISeatSelectionWarning, UISeatState } from "@/components/seating-plan/types";
 import { useRouter } from "next/navigation";
 import { Profile } from "@/lib/protected";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -19,6 +19,37 @@ interface SeatSelectionWarningContext {
   error: string,
   message: string,
   context?: any,
+}
+
+function LegendSection({ categories }: { categories: Map<string, UICategoryMetadata> }) {
+  return (
+    <div className="grid grid-rows-4 sm:grid-rows-2 lg:grid-rows-4 grid-flow-col gap-2 text-xs sm:text-sm font-light">
+      <div className="flex space-x-2 items-center">
+        <div className="size-4 sm:size-5 bg-gray-500 outline-black outline-2"><NotSelectableSeat /></div>
+        <p>Not for selection</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="size-4 sm:size-5 bg-red-900 outline-black outline-2"><TakenSeat /></div>
+        <p>Already taken</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="size-4 sm:size-5 bg-white outline-black outline-2"><DefaultSeat /></div>
+        <p>Available</p>
+      </div>
+      <div className="flex space-x-2 items-center">
+        <div className="size-4 sm:size-5 bg-blue-500 outline-black outline-2"><SelectedSeat /></div>
+        <p>Selected</p>
+      </div>
+      {Array.from(categories.entries()).map(([cat, data]) => (
+        <div key={cat} className="flex space-x-2 items-center">
+          <svg className="block w-5 h-5" width="20" height="20">
+            <circle cx="10" cy="10" r="10" fill={data.style.color} />
+          </svg>
+          <p>{data.label}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function Page() {
@@ -40,6 +71,10 @@ export default function Page() {
   const openConfirmDialog = () => { setConfirmDialogIsOpen(true) };
   const closeConfirmDialog = () => { setConfirmDialogIsOpen(false) };
 
+  const [sidebarIsOpen, setSidebarIsOpen] = React.useState(true);
+  const openSidebar = () => { setSidebarIsOpen(true) };
+  const closeSidebar = () => { setSidebarIsOpen(false) };
+
   // Set to true when request to reserve seats is sent and is awaiting for response
   const [awaitingConfirmation, setAwaitingConfirmation] = React.useState(false);
 
@@ -48,8 +83,6 @@ export default function Page() {
 
   // This value is only updated every time `rerender` is updated
   const warningContext = assertFinalSelectionValid();
-
-  const [showWarningContext, setShowWarningContext] = React.useState(true);
 
   const confirmDialogIsOpenRef = React.useRef(false);
   confirmDialogIsOpenRef.current = confirmDialogIsOpen;
@@ -97,7 +130,6 @@ export default function Page() {
     if (contextValue === null) return;
     if (warningContext !== null) {
       toast.warn(warningContext.message);
-      setShowWarningContext(true);
     } else {
       setFinalSelection(await contextValue.manager.getSelection());
       openConfirmDialog();
@@ -202,7 +234,6 @@ export default function Page() {
 
         if (warnings.length > 0 && confirmDialogIsOpenRef.current) {
           toast.info("Your selection has been updated.");
-          setShowWarningContext(true);
           closeConfirmDialog();
         }
 
@@ -222,7 +253,6 @@ export default function Page() {
       setContextValue(getCustomerSeatingPlanContextValue(
         manager,
         seatSelectionWarningsHandler,
-        setRerender,
       ));
     }).catch((err: any) => {
       console.log(err);
@@ -253,62 +283,96 @@ export default function Page() {
   const levelEntries = Array.from(contextValue.levels.entries());
   const categoryEntries = Array.from(contextValue.categories.entries());
 
+  const currentLevel = contextValue.manager.currentLevel;
   const selectionData = contextValue.manager.selection
     .map(id => contextValue.manager.seatMap.get(id)!)
     .map(data => ({ category: data.category, level: data.level, label: data.label }));
 
   return (
     <CustomerSeatingPlanContext.Provider value={contextValue}>
-      <div className="flex w-[1200px] h-[600px]">
-        <div className="w-[800px] h-full">
-          <CustomerSeatingPlanInterface />
+      <div className="relative flex lg:space-x-4 w-full h-full lg:max-w-[1320px] lg:max-h-[720px] md:p-8 lg:p-16">
+        <div className="relative not-lg:basis-full lg:basis-3/4 outline-4 outline-[#3E3E3E] bg-[#EEEEEE] md:rounded-md">
+          <CustomerSeatingPlanInterface level={currentLevel}>
+            <div className={`${sidebarIsOpen && "not-lg:hidden"} absolute bottom-4 left-4 right-4 grid grid-cols-[1fr] md:grid-cols-[auto_1fr] grid-flow-row justify-end gap-4 pointer-events-none`}>
+              <div className="flex h-10 sm:h-12 p-1 sm:p-2 bg-[#3E3E3E]/80 rounded-2xl sm:rounded-3xl place-self-end pointer-events-auto">
+                {levelEntries.map(([level, data]) => (
+                  <div
+                    key={level}
+                    className={`
+                      cursor-pointer h-full px-2 flex flex-col justify-center rounded-xl sm:rounded-2xl
+                      ${currentLevel === level && "bg-[#222222] font-semibold"}
+                    `}
+                    onClick={() => contextValue.manager.setCurrentLevel(level)}
+                  >
+                    <p className="text-sm sm:text-base">{data.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="lg:hidden p-2 bg-[#3E3E3E]/80 rounded-2xl">
+                <div className="w-full p-2">
+                  <LegendSection categories={contextValue.categories} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="p-2 text-xs sm:text-sm">
+                    <p>{selectionData.length ? `${selectionData.length} of ${profile!.catA + profile!.catB + profile!.catC} selected.` : "None selected."}</p>
+                    {warningContext && (selectionData.length > 0) &&
+                      <p className="text-amber-300">
+                        {warningContext.error === "UNEXPECTED_NUM_OF_SEATS" ? (
+                          `${warningContext.context.length} seats remaining.`
+                        ) : (
+                          "There are issues with your selection."
+                        )}
+                      </p>
+                    }
+                  </div>
+                  <div className="pointer-events-auto">
+                    <RegularButton variant="white" buttonClass="w-[120px] p-2 rounded-2xl" onClick={openSidebar}>
+                      <span className="px-1 text-sm sm:text-base font-medium">Show all</span>
+                    </RegularButton>
+                  </div>
+                </div>
+                <div className="w-full p-2 flex space-x-2 items-center">
+                  <span className="inline-block">
+                    {/* https://reactsvgicons.com/ */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="1.5em"
+                      height="1.5em"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4"
+                      ></path>
+                    </svg>
+                  </span>{" "}
+                  <p className="text-sm sm:text-base">
+                    Need assistance? Contact us via WhatsApp:{" "}
+                    <span className="underline font-semibold">
+                      Kacey (+62 811 3114 001)
+                    </span>{" "}
+                    or{" "}
+                    <span className="underline font-semibold">
+                      Michelle (+65 8264 0091)
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CustomerSeatingPlanInterface>
         </div>
-        <div className="m-4 w-full flex flex-col space-y-6">
-          <div className="space-y-4">
+        {/* "Sidebar", visible on large screens, otherwise need to open */}
+        <div className={`${!sidebarIsOpen && "not-lg:hidden"} not-lg:absolute z-10 not-lg:inset-0 not-lg:bg-background/80 p-8 md:p-16 lg:p-0 lg:basis-1/4 flex flex-col space-y-6`}>
+          <div className="not-lg:hidden space-y-4">
             <h3 className="text-xl font-semibold">Legend</h3>
-            <div className="flex space-x-6 text-sm font-light">
-              <div className="space-y-2">
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <NotSelectableSeat />
-                  </div>
-                  <p>Not for selection</p>
-                </div>
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <TakenSeat />
-                  </div>
-                  <p>Already taken</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <DefaultSeat />
-                  </div>
-                  <p>Available</p>
-                </div>
-                <div className="flex space-x-2 items-center">
-                  <div className="w-5 h-5">
-                    <SelectedSeat />
-                  </div>
-                  <p>Selected</p>
-                </div>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold">Seat Category</h3>
-            <div className="space-x-2 text-sm font-light">
-              <p>Cat. A: Level 1, Lines G-X</p>
-              <p>Cat. B: Level 1, Lines AA-GG and LL</p>
-              <p>Cat. C: Level 2</p>
-            </div>
+            <LegendSection categories={contextValue.categories} />
           </div>
           <div className="flex-1 flex flex-col space-y-4">
             <h3 className="text-xl font-semibold">Your Selection</h3>
             <div className="relative flex-1 outline-1 outline-[#EEEEEE] rounded-sm flex flex-col">
               <div className="absolute inset-2 space-y-2 text-xs sm:text-sm text-background overflow-auto scrollbar-hidden">
                 <p className="text-foreground">{selectionData.length ? `${selectionData.length} of ${profile!.catA + profile!.catB + profile!.catC} selected.` : "None selected."}</p>
-                {showWarningContext && warningContext && (selectionData.length > 0) &&
+                {warningContext && (selectionData.length > 0) &&
                   <div className="w-full p-2 flex space-x-2 rounded-xl bg-amber-300">
                     <div className="flex-1 space-y-1">
                       <p>{warningContext.message}</p>
@@ -357,6 +421,14 @@ export default function Page() {
                 })}
               </div>
             </div>
+            <div className="w-full lg:hidden">
+              <RegularButton
+                variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
+                onClick={closeSidebar}
+              >
+                <span className="text-sm sm:text-base font-medium">Back to map</span>
+              </RegularButton>
+            </div>
             <div className="w-full">
               <RegularButton
                 variant="white" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl"
@@ -368,13 +440,39 @@ export default function Page() {
           </div>
         </div>
       </div>
+      <div className="not-lg:hidden absolute bottom-4 right-4 flex space-x-2 items-center">
+        <span className="inline-block">
+          {/* https://reactsvgicons.com/ */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1.5em"
+            height="1.5em"
+          >
+            <path
+              fill="currentColor"
+              d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4"
+            ></path>
+          </svg>
+        </span>{" "}
+        <p className="text-sm sm:text-base">
+          Need assistance? Contact us via WhatsApp:{" "}
+          <span className="underline font-semibold">
+            Kacey (+62 811 3114 001)
+          </span>{" "}
+          or{" "}
+          <span className="underline font-semibold">
+            Michelle (+65 8264 0091)
+          </span>
+        </p>
+      </div>
       <Dialog open={confirmDialogIsOpen} onClose={awaitingConfirmation ? (() => {}) : closeConfirmDialog} className="relative z-10">
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center text-background text-center">
           <DialogPanel className="w-full max-w-[720px] min-h-2/3 m-8 flex flex-col items-center justify-center bg-[#EEEEEE] rounded-2xl">
-            <div className="h-full max-h-[540px] m-12 sm:m-24 flex flex-col items-center justify-between space-y-8">
-              <DialogTitle className="px-4 text-2xl sm:text-3xl font-medium">Confirm selection?</DialogTitle>
-              <div className="px-4 text-xs sm:text-sm font-light space-y-4">
+            <div className="h-full max-h-[540px] m-8 sm:m-24 flex flex-col items-center justify-between space-y-8">
+              <DialogTitle className="sm:px-4 text-2xl sm:text-3xl font-medium">Confirm selection?</DialogTitle>
+              <div className="sm:px-4 text-xs sm:text-sm font-light space-y-4">
                 <p>You are about to make a reservation for the following seats:</p>
                 <p className="text-base sm:text-lg font-semibold">{
                   finalSelection.map(id => contextValue.manager.seatMap.get(id)!)
@@ -392,9 +490,9 @@ export default function Page() {
                   <span className="text-base sm:text-lg font-medium">Confirm seats</span>
                 </RegularButton>
                 {awaitingConfirmation ? (
-                  <p className="px-4 text-sm sm:text-base">Please wait, this may take a while...</p>
+                  <p className="sm:px-4 text-sm sm:text-base">Please wait, this may take a while...</p>
                 ) : (
-                  <p className="px-4 text-sm sm:text-base">
+                  <p className="sm:px-4 text-sm sm:text-base">
                     <InlineButton onClick={closeConfirmDialog}>
                       No, I want to change my selection.
                     </InlineButton>

@@ -21,12 +21,8 @@ export interface UICategoryMetadata {
   style: {
     width: number,
     height: number,
-  },
-  themes: {
-    notSelectable: React.FC<{ children?: ReactNode }>,
-    taken: React.FC<{ children?: ReactNode }>,
-    selected: React.FC<{ children?: ReactNode }>,
-    default: React.FC<{ children?: ReactNode }>,
+    color: string,
+    shadowClass: string,
   },
 }
 
@@ -176,4 +172,12 @@ export interface SeatingPlanContextType<T extends BaseSeatingPlanManager> {
   manager: T,
   seatSelectionWarningsHandler: (warnings: UISeatSelectionWarning[]) => Promise<void> | void,
   SeatComponent: React.FC<{ id: string }>,
+}
+
+export const SeatingPlanTransformContext = React.createContext<SeatingPlanTransformContextType>({
+  showSeatLabel: false,
+});
+
+export interface SeatingPlanTransformContextType {
+  showSeatLabel: boolean,
 }
