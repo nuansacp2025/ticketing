@@ -133,11 +133,13 @@ export default function Page() {
                     </InlineButton></p>
                   </Link>
                 </div>
+                {/*
                 <Link href="/share/example" className="w-full">
                   <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">
                     <span className="text-base sm:text-lg font-medium">Share event details</span>
                   </RegularButton>
                 </Link>
+                */}
               </div>
             </>
             :
