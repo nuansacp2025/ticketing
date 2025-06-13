@@ -346,10 +346,10 @@ export default function Page() {
                       ></path>
                     </svg>
                   </span>{" "}
-                  <p className="text-sm sm:text-base">
-                    Need assistance? Contact us via WhatsApp:{" "}
+                  <p className="text-xs sm:text-sm">
+                    Need live assistance? Contact us via WhatsApp:{" "}
                     <span className="underline font-semibold">
-                      Kacey (+62 811 3114 001)
+                      Kacey (+65 9249 8978)
                     </span>{" "}
                     or{" "}
                     <span className="underline font-semibold">
@@ -458,7 +458,7 @@ export default function Page() {
         <p className="text-sm sm:text-base">
           Need assistance? Contact us via WhatsApp:{" "}
           <span className="underline font-semibold">
-            Kacey (+62 811 3114 001)
+            Kacey (+65 9249 8978)
           </span>{" "}
           or{" "}
           <span className="underline font-semibold">

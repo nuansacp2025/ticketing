@@ -127,7 +127,7 @@ export default function Page() {
               <div className="w-full flex flex-col items-center space-y-4 text-center">
                 <div className="sm:px-4 flex flex-col items-center space-y-1 text-sm sm:text-base font-light">
                   <p>Please check that you have received an email from us.</p>
-                  <Link href="/help#find-confirmation-email">
+                  <Link href="/help#find-confirmation-email" rel="noopener noreferrer" target="_blank">
                     <p><InlineButton>
                       Haven't received your email?
                     </InlineButton></p>
@@ -151,7 +151,8 @@ export default function Page() {
                     Missing:{" "}
                     {Array.from(categories.entries())
                       .filter(([key, [Label, count]]) => count > 0)
-                      .map(([key, [label, count]]) => `${count} seats of ${label}`)}
+                      .map(([key, [label, count]]) => `${count} seats of ${label}`)
+                      .join(", ")}
                   </p>
                   <p>
                     <InlineButton onClick={openSeatView}>
