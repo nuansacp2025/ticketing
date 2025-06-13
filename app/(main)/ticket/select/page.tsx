@@ -14,6 +14,7 @@ import { Profile } from "@/lib/protected";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ToastContainer, toast } from "react-toastify";
 import { CustomerSeatingPlanManager } from "@/components/seating-plan/customer/types";
+import Link from "next/link";
 
 interface SeatSelectionWarningContext {
   error: string,
@@ -390,6 +391,11 @@ export default function Page() {
                       )
                       : null
                       }
+                      <Link href="/help#selection-issues" rel="noopener noreferrer" target="_blank">
+                        <p><InlineButton>
+                          Learn more...
+                        </InlineButton></p>
+                      </Link>
                     </div>
                     <div className="flex flex-col items-center space-y-2">
                       <span>
