@@ -6,6 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Loading } from "@/components/common/loading";
+import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import 'react-medium-image-zoom/dist/styles.css'
 
 export default function Page() {
   const router = useRouter();
@@ -148,6 +151,11 @@ export default function Page() {
                       .filter(([key, [Label, count]]) => count > 0)
                       .map(([key, [label, count]]) => `${count} seats of ${label}`)}
                   </p>
+                  <p>
+                    <InlineButton onClick={openSeatView}>
+                      View seating layout...
+                    </InlineButton>
+                  </p>
                 </div>
                 <Link href="/ticket/select" className="w-full">
                   <RegularButton variant="black" buttonClass="w-full max-w-[480px] h-[48px] rounded-3xl">
@@ -159,20 +167,30 @@ export default function Page() {
           }
         </div>
       </div>
-      <div className={`absolute inset-8 sm:inset-16 flex flex-col text-foreground ${!seatView && "hidden"}`}>
+      <div className={`absolute inset-8 sm:inset-16 flex flex-col space-y-4 sm:space-y-8 text-foreground ${!seatView && "hidden"}`}>
         <p className="text-lg sm:text-xl font-medium align-middle">
           <InlineButton onClick={closeSeatView}>
             <span className="mr-2">
               {/* https://flowbite.com/icons/ */}
               <svg className="w-6 h-6 sm:w-8 sm:h-8 inline" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
               </svg>
             </span>
             Back to Home
           </InlineButton>
         </p>
-        <div className="flex-1 flex items-center justify-center">
-          <p>Seating Plan (WIP)</p>
+        <p className="text-center text-base sm:text-lg font-medium animate-pulse">Click on image to zoom in...</p>
+        <div className="flex-1 sm:px-16 flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-center">
+          <div className="relative w-full h-full">
+            <Zoom>
+              <Image src="/images/ticket/layout-level-1.jpg" alt="Level 1" fill className="object-contain" />
+            </Zoom>
+          </div>
+          <div className="relative w-full h-full">
+            <Zoom>
+              <Image src="/images/ticket/layout-level-2.jpg" alt="Level 2" fill className="object-contain" />
+            </Zoom>
+          </div>
         </div>
       </div>
     </>
