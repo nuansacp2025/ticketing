@@ -30,7 +30,24 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     const checkedInTickets = Object.values(tickets).filter(t => t.checkedIn).length;
 
     const totalSeats = Object.keys(seats).length;
+    const notSelectableSeats = Object.values(seats).filter(s => s.notSelectable === true).length;
     const reservedSeats = Object.values(seats).filter(s => !s.isAvailable).length;
+
+    const catASeats = Object.values(seats).filter(s => s.category === 'catA').length;
+    const catBSeats = Object.values(seats).filter(s => s.category === 'catB').length;
+    const catCSeats = Object.values(seats).filter(s => s.category === 'catC').length;
+
+    const catANotSelectableSeats = Object.values(seats).filter(s => s.category === 'catA' && s.notSelectable === true).length;
+    const catAReservedSeats = Object.values(seats).filter(s => s.category === 'catA' && !s.isAvailable).length;
+    const catAAvailableSeats = Object.values(seats).filter(s => s.category === 'catA' && s.isAvailable).length;
+
+    const catBNotSelectableSeats = Object.values(seats).filter(s => s.category === 'catB' && s.notSelectable === true).length;
+    const catBReservedSeats = Object.values(seats).filter(s => s.category === 'catB' && !s.isAvailable).length;
+    const catBAvailableSeats = Object.values(seats).filter(s => s.category === 'catB' && s.isAvailable).length;
+
+    const catCNotSelectableSeats = Object.values(seats).filter(s => s.category === 'catC' && s.notSelectable === true).length;
+    const catCReservedSeats = Object.values(seats).filter(s => s.category === 'catC' && !s.isAvailable).length;
+    const catCAvailableSeats = Object.values(seats).filter(s => s.category === 'catC' && s.isAvailable).length;
 
     const makeData = (data: number[], titles: string[], colors: string[]) => data.map((value, index) => ({
         name: titles[index],
@@ -97,8 +114,28 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
             {
                 key: 'seats',
                 label: 'Seats Status',
-                data: makeData([totalSeats - reservedSeats, reservedSeats], ['Available', 'Reserved'], COLORS),
+                data: makeData([totalSeats - reservedSeats - notSelectableSeats, reservedSeats, notSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
             },
+            {
+                key: 'seatsCategories',
+                label: 'Seats Categories',
+                data: makeData([catASeats, catBSeats, catCSeats], ['Category A', 'Category B', 'Category C'], COLORS),
+            },
+            {
+                key: 'seatsCategoryA',
+                label: 'Category A Seats Status',
+                data: makeData([catAAvailableSeats, catAReservedSeats, catANotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+            },
+            {
+                key: 'seatsCategoryB',
+                label: 'Category B Seats Status',
+                data: makeData([catBAvailableSeats, catBReservedSeats, catBNotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+            },
+            {
+                key: 'seatsCategoryC',
+                label: 'Category C Seats Status',
+                data: makeData([catCAvailableSeats, catCReservedSeats, catCNotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+            }
             ].map(({ key, label, data }) => {
                 const totalValue = data.reduce((sum, d) => sum + d.value, 0);
                 const percent = data[0].value && totalValue
