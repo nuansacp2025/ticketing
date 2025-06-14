@@ -14,6 +14,7 @@ import { Profile } from "@/lib/protected";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ToastContainer, toast } from "react-toastify";
 import { CustomerSeatingPlanManager } from "@/components/seating-plan/customer/types";
+import Link from "next/link";
 
 interface SeatSelectionWarningContext {
   error: string,
@@ -346,10 +347,10 @@ export default function Page() {
                       ></path>
                     </svg>
                   </span>{" "}
-                  <p className="text-sm sm:text-base">
-                    Need assistance? Contact us via WhatsApp:{" "}
+                  <p className="text-xs sm:text-sm">
+                    Need live assistance? Contact us via WhatsApp:{" "}
                     <span className="underline font-semibold">
-                      Kacey (+62 811 3114 001)
+                      Kacey (+65 9249 8978)
                     </span>{" "}
                     or{" "}
                     <span className="underline font-semibold">
@@ -390,6 +391,11 @@ export default function Page() {
                       )
                       : null
                       }
+                      <Link href="/help#selection-issues" rel="noopener noreferrer" target="_blank">
+                        <p><InlineButton>
+                          Learn more...
+                        </InlineButton></p>
+                      </Link>
                     </div>
                     <div className="flex flex-col items-center space-y-2">
                       <span>
@@ -458,7 +464,7 @@ export default function Page() {
         <p className="text-sm sm:text-base">
           Need assistance? Contact us via WhatsApp:{" "}
           <span className="underline font-semibold">
-            Kacey (+62 811 3114 001)
+            Kacey (+65 9249 8978)
           </span>{" "}
           or{" "}
           <span className="underline font-semibold">

@@ -85,10 +85,10 @@ export default function Page() {
             </div>
             
           </div>
-          <Link href="/help#find-ticket-code" rel="noopener noreferrer" target="_blank">
+          <Link href="/help#login" rel="noopener noreferrer" target="_blank">
             <p className="text-xs sm:text-sm font-light">
               <InlineButton>
-                How do I find my ticket code?
+                How do I find my email and ticket code?
               </InlineButton>
             </p>
           </Link>
