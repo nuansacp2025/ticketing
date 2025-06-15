@@ -16,7 +16,7 @@ interface StatsProps {
 }
 
 // Palette: main green & neutral gray
-const COLORS = ['#66BB6A', '#EEEEEE', '#FFA500'];
+const COLORS = ['#66BB6A', '#EEEEEE', '#FFA500', '#42A5F5'];
 
 export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     const ticketMap = new Map<string, Ticket>(Object.entries(tickets).map(([id, ticket]) => [id, ticket]));
@@ -37,20 +37,23 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     const catBSeats = Object.values(seats).filter(s => s.category === 'catB').length;
     const catCSeats = Object.values(seats).filter(s => s.category === 'catC').length;
 
+    const catAPurchasedSeats = Object.values(tickets).map(t => t.catA).reduce((sum, value) => sum + (value || 0), 0);
     const catANotSelectableSeats = Object.values(seats).filter(s => s.category === 'catA' && s.notSelectable === true).length;
     const catAReservedSeats = Object.values(seats).filter(s => s.category === 'catA' && !s.isAvailable).length;
     const catAAvailableSeats = Object.values(seats).filter(s => s.category === 'catA' && s.isAvailable).length;
 
+    const catBPurchasedSeats = Object.values(tickets).map(t => t.catB).reduce((sum, value) => sum + (value || 0), 0);
     const catBNotSelectableSeats = Object.values(seats).filter(s => s.category === 'catB' && s.notSelectable === true).length;
     const catBReservedSeats = Object.values(seats).filter(s => s.category === 'catB' && !s.isAvailable).length;
     const catBAvailableSeats = Object.values(seats).filter(s => s.category === 'catB' && s.isAvailable).length;
 
+    const catCPurchasedSeats = Object.values(tickets).map(t => t.catC).reduce((sum, value) => sum + (value || 0), 0);
     const catCNotSelectableSeats = Object.values(seats).filter(s => s.category === 'catC' && s.notSelectable === true).length;
     const catCReservedSeats = Object.values(seats).filter(s => s.category === 'catC' && !s.isAvailable).length;
     const catCAvailableSeats = Object.values(seats).filter(s => s.category === 'catC' && s.isAvailable).length;
 
     const makeData = (data: number[], titles: string[], colors: string[]) => data.map((value, index) => ({
-        name: titles[index],
+        name: `${titles[index]} (${value})`,
         value: value,
         color: colors[index % colors.length],
     }));
@@ -58,7 +61,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
     // Styles
     const grid = {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(3, minmax(300px, 1fr))',
         gap: 24,
     } as React.CSSProperties;
     const card = {
@@ -109,7 +112,7 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
             {
                 key: 'tickets',
                 label: 'Tickets Status',
-                data: makeData([unconfirmedTickets, totalTickets - unconfirmedTickets - checkedInTickets, checkedInTickets], ['Unconfirmed', 'Confirmed but not Checked In', 'Checked In'], COLORS),
+                data: makeData([unconfirmedTickets, totalTickets - unconfirmedTickets - checkedInTickets, checkedInTickets], ['Unconfirmed', 'Not Checked In', 'Checked In'], COLORS),
             },
             {
                 key: 'seats',
@@ -123,18 +126,18 @@ export const Stats: React.FC<StatsProps> = ({ customers, tickets, seats }) => {
             },
             {
                 key: 'seatsCategoryA',
-                label: 'Category A Seats Status',
-                data: makeData([catAAvailableSeats, catAReservedSeats, catANotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+                label: 'Category A Seats',
+                data: makeData([catAAvailableSeats, catAReservedSeats, catANotSelectableSeats, catAPurchasedSeats - catAReservedSeats], ['Available', 'Reserved', 'Not Selectable', `Purchased not Reserved`], COLORS),
             },
             {
                 key: 'seatsCategoryB',
-                label: 'Category B Seats Status',
-                data: makeData([catBAvailableSeats, catBReservedSeats, catBNotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+                label: 'Category B Seats',
+                data: makeData([catBAvailableSeats, catBReservedSeats, catBNotSelectableSeats, catBPurchasedSeats - catBReservedSeats], ['Available', 'Reserved', 'Not Selectable', 'Purchased not Reserved'], COLORS),
             },
             {
                 key: 'seatsCategoryC',
-                label: 'Category C Seats Status',
-                data: makeData([catCAvailableSeats, catCReservedSeats, catCNotSelectableSeats], ['Available', 'Reserved', 'Not Selectable'], COLORS),
+                label: 'Category C Seats',
+                data: makeData([catCAvailableSeats, catCReservedSeats, catCNotSelectableSeats, catCPurchasedSeats - catCReservedSeats], ['Available', 'Reserved', 'Not Selectable', `Purchased not Reserved`], COLORS),
             }
             ].map(({ key, label, data }) => {
                 const totalValue = data.reduce((sum, d) => sum + d.value, 0);
