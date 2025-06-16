@@ -37,7 +37,7 @@ async def handle_seat_confirmation():
         ticket_code = data.get("ticketCode")
         assert isinstance(ticket_code, str)
     except Exception as e:
-        return { "success": False, "message": "Fields `email`, `ticketCode`, and `seats` required" }, 400
+        return { "success": False, "message": "Field `ticketCode` required" }, 400
 
     # TODO: this should be in scripts/db/db.py instead
     ticket_ref = db.collection("tickets").where("code", "==", ticket_code).get()
