@@ -1,0 +1,4 @@
+# Vercel takes ALL Python files inside `/api` and makes it a serverless function
+# But (it looks like) we can only have at most 12 Python serverless functions
+# So we need to ignore the folder `/api/scripts`
+api/scripts/*
