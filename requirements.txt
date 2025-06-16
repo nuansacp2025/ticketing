@@ -1,4 +1,4 @@
-Flask
+flask[async]
 aiohttp
 jinja2
 python-dotenv
