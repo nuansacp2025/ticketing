@@ -34,15 +34,13 @@ async def handle_seat_confirmation():
 
     try:
         data = request.get_json()
-        ticket_code = data.get("ticketCode")
-        assert isinstance(ticket_code, str)
+        ticket_id = data.get("ticketId")
+        assert isinstance(ticket_id, str)
     except Exception as e:
         return { "success": False, "message": "Field `ticketCode` required" }, 400
 
     # TODO: this should be in scripts/db/db.py instead
-    ticket_snap = db.collection("tickets").where("code", "==", ticket_code).get()
-    assert len(ticket_snap) == 1  # if this is raised then something is seriously wrong
-    ticket_ref = ticket_snap[0].reference
+    ticket_ref = db.document("tickets", ticket_id)
     pdf_generator = TicketPDFGenerator()
 
     try:
