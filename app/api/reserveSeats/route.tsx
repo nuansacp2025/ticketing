@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
 
     await setSeatsReserved(body.ids, ticketId);
 
-    const profile = await getMyProfile(ticketId);
-    const reservedSeats = await getSeatsQuery({ reservedBy: ticketId });
     const emailResponse = await fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
       method: "POST",
       headers: {
@@ -29,10 +27,7 @@ export async function POST(request: NextRequest) {
         "x-vercel-protection-bypass": VERCEL_PROTECTION_BYPASS,  // only needed in preview env
         "X-Internal-API-Credentials": API_CREDS_INTERNAL_USE_ONLY,
       },
-      body: JSON.stringify({
-        profile,
-        seats: Object.values(reservedSeats),
-      }),
+      body: JSON.stringify({ ticketId }),
     });
 
     const ticketRef = doc(db, "tickets", ticketId);
