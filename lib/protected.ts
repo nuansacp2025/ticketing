@@ -85,6 +85,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
       throw new ConflictError("Seats are already confirmed");
     }
 
+    const fetchedSeats: { [key: string]: SeatMetadata } = {};
     const seatRefs = ids.map(id => doc(db, "seats", id));
     const counts: { [key: string]: number } = {
       catA: 0,
@@ -98,6 +99,7 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
         throw new NotFoundError(`Seat ${ids[i]} does not exist`);
       }
       const seatData = seatDoc.data();
+      fetchedSeats[ids[i]] = seatData as SeatMetadata;
       if (seatData.isAvailable == false && seatData.reservedBy != ticketId) {
         throw new ConflictError(`Seat ${ids[i]} is not available`);
       } else if (seatData.isAvailable) {
@@ -121,6 +123,46 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
     }
 
     const isAvailableCache = doc(db, "caches", "seats.isAvailable");
+    const isAvailableSnap = await transaction.get(isAvailableCache);
+    const isAvailableData = isAvailableSnap.data() || {};  // assumes the doc exists, we just put {} for better type inference
+    for (let i = 0; i < ids.length; i++) {
+      isAvailableData[ids[i]] = false;
+    }
+
+    // Check if the nearby seats become isolated
+    for (let i = 0; i < ids.length; i++) {
+      const seat = fetchedSeats[ids[i]];
+      if (seat.leftId) {
+        if (!(seat.leftId in fetchedSeats)) {
+          const seatDoc = await transaction.get(doc(db, "seats", seat.leftId));
+          if (!seatDoc.exists()) {
+            throw new NotFoundError(`Left seat ${seat.leftId} does not exist`);
+          }
+          const leftSeatData = seatDoc.data() as SeatMetadata;
+          fetchedSeats[seat.leftId] = leftSeatData;
+        }
+        const leftSeat = fetchedSeats[seat.leftId];
+        if (isAvailableData[seat.leftId] && (!leftSeat.leftId || !isAvailableData[leftSeat.leftId]) && (!leftSeat.rightId || !isAvailableData[leftSeat.rightId])) {
+          throw new ConflictError(`Seat ${seat.leftId} will be isolated if the reservation is made`);
+        }
+      }
+      if (seat.rightId) {
+        if (!(seat.rightId in fetchedSeats)) {
+          const seatDoc = await transaction.get(doc(db, "seats", seat.rightId));
+          if (!seatDoc.exists()) {
+            throw new NotFoundError(`Right seat ${seat.rightId} does not exist`);
+          }
+          const rightSeatData = seatDoc.data() as SeatMetadata;
+          fetchedSeats[seat.rightId] = rightSeatData;
+        }
+        const rightSeat = fetchedSeats[seat.rightId];
+        if (isAvailableData[seat.rightId] && (!rightSeat.leftId || !isAvailableData[rightSeat.leftId]) && (!rightSeat.rightId || !isAvailableData[rightSeat.rightId])) {
+          throw new ConflictError(`Seat ${seat.rightId} will be isolated if the reservation is made`);
+        }
+      }
+    }
+
+
     for (let i = 0; i < ids.length; i++) {
       await transaction.update(seatRefs[i], { isAvailable: false, reservedBy: ticketId, lastUpdated: Timestamp.now() });
     }
