@@ -124,11 +124,8 @@ export async function setSeatsReserved(ids: string[], ticketId: string) {
 
     const isAvailableCache = doc(db, "caches", "seats.isAvailable");
     const isAvailableSnap = await transaction.get(isAvailableCache);
-    const isAvailableData = isAvailableSnap.data() || {};
+    const isAvailableData = isAvailableSnap.data() || {};  // assumes the doc exists, we just put {} for better type inference
     for (let i = 0; i < ids.length; i++) {
-      if (!isAvailableData[ids[i]].isAvailable) {
-        throw new ConflictError(`Seat ${ids[i]} is not available`);
-      }
       isAvailableData[ids[i]] = false;
     }
 
