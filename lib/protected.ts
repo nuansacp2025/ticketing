@@ -1,4 +1,4 @@
-import { getCustomerByTicketId, getSeats, getSeatsQuery, getTicket, getTicketByCode, SeatMetadata } from "./db";
+import { getCustomerByTicketId, getSeats, getSeatsQuery, getTicket, getTicketByCode, Seat, SeatMetadata } from "./db";
 import {
     doc,
     updateDoc,
@@ -39,21 +39,25 @@ export async function getMyProfile(ticketId: string): Promise<Profile | null> {
     };
 }
 
-export async function updateCheckedInStatus(ticketCode: string) {
+export async function updateCheckedInStatus(ticketCode: string, seatIds: string[]): Promise<Record<string, Seat>> {
     const ticket = await getTicketByCode(ticketCode);
     if (ticket == null) {
         throw new NotFoundError("Ticket not found");
     }
-    if (ticket?.checkedIn) {
-        throw new ConflictError("Ticket already checked In");
-    }
+    // if (ticket?.checkedIn) {
+    //     throw new ConflictError("Ticket already checked In");
+    // }
     if (!ticket?.seatConfirmed) {
         throw new BadRequestError("Seat need to be confirmed first");
     }
+
+    await setSeatsCheckedIn(seatIds, ticket.id);
+
     const seats = await getSeatsQuery({ reservedBy: ticket.id });
 
-    const ticketRef = doc(db, "tickets", ticket.id);
-    await updateDoc(ticketRef, { checkedIn: true, lastUpdated: Timestamp.now() });
+    // const ticketRef = doc(db, "tickets", ticket.id);
+    // await updateDoc(ticketRef, { checkedIn: true, lastUpdated: Timestamp.now() });
+
     return seats;
 }
 
@@ -72,6 +76,31 @@ export async function getSeatsAvailability(): Promise<Map<String, boolean>> {
   return seatsAvailability;
 }
 */
+export async function setSeatsCheckedIn(ids: string[], ticketId: string) {
+  await runTransaction(db, async (transaction) => {
+    const seatRefs = ids.map(id => doc(db, "seats", id));
+    for (let i = 0; i < ids.length; i++) {
+      const seatRef = seatRefs[i];
+      const seatDoc = await transaction.get(seatRef);
+      if (!seatDoc.exists()) {
+        throw new NotFoundError(`Seat ${ids[i]} does not exist`);
+      }
+      const seatData = seatDoc.data();
+      if (seatData.reservedBy !== ticketId) {
+        throw new ConflictError(`Seat ${ids[i]} is not reserved by this ticket`);
+      }
+    }
+    const checkedinCache = doc(db, "caches", "seats.checkedIn");
+    const checkedinSnap = await transaction.get(checkedinCache);
+    const checkedinData = checkedinSnap.data() || {};  // assumes the doc exists, we just put {} for better type inference
+    for (let i = 0; i < ids.length; i++) {
+      if (checkedinData[ids[i]] === true) {
+        throw new ConflictError(`Seat ${ids[i]} is already checked in`);
+      }
+    }
+    await transaction.update(checkedinCache, Object.fromEntries(ids.map(id => [id, true])));
+  });
+}
 
 export async function setSeatsReserved(ids: string[], ticketId: string) {
   await runTransaction(db, async (transaction) => {
