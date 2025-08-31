@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import admin from "firebase-admin";
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
@@ -14,6 +15,17 @@ const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// ✅ Initialize App Check
+if (typeof window !== 'undefined') {
+  // Only run App Check in the browser
+
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 const db = getFirestore(app);
 const auth = getAuth(app);
 
