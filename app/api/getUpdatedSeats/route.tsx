@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Timestamp } from 'firebase/firestore';
 import { getSeatsQuery } from '@/lib/db';
+import { ApiError } from '@/lib/error';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
       "lastUpdated": maxUpdatedDate.toISOString()
     })
   } catch (error) {
+    if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });
     return NextResponse.json({ error: 'Failed to fetch seats' }, { status: 500 });
   }
 }

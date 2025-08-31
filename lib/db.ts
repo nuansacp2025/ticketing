@@ -52,6 +52,7 @@ export interface Seat {
     notSelectable?: boolean,  // by default Seat is ignored with this is true; use getSeatsMetadata otherwise
     leftId?: string | null,
     rightId?: string | null,
+    checkedIn?: boolean,
     lastUpdated?: Timestamp,  // last time this seat was updated
 }
 
@@ -334,8 +335,12 @@ export async function getSeatsQuery(filters: {
     if (snapshot.empty) return {};
     
     const seats: Record<string, Seat> = {};
+    const checkedInCache = doc(db, "caches", "seats.checkedIn");
+    const checkedInSnap = await getDoc(checkedInCache);
+    const checkedInData = checkedInSnap.data() || {};
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
+        const checkedIn = checkedInData[docSnap.id] || false;
         seats[docSnap.id] = {
             id: docSnap.id,
             label: data.label,
@@ -347,7 +352,8 @@ export async function getSeatsQuery(filters: {
             notSelectable: data.notSelectable ?? false,
             leftId: data.leftId ?? null,
             rightId: data.rightId ?? null,
-            lastUpdated: data.lastUpdated ?? null
+            lastUpdated: data.lastUpdated ?? null,
+            checkedIn: checkedIn
         };
     });
     return seats;
@@ -394,5 +400,39 @@ export async function getSeatsMetadata(): Promise<SeatMetadata[]> {
         });
     });
 
+    return seats;
+}
+
+export async function getSeatsByTicketCode(ticketCode: string): Promise<Seat[]> {
+    const ticketsRef = collection(db, 'tickets');
+    const ticketSnap = await getDocs(query(ticketsRef, where('code', '==', ticketCode)));
+    if (ticketSnap.empty) return [];
+    const ticketId = ticketSnap.docs[0].id;
+    const seatsRef = collection(db, 'seats');
+    const q = query(seatsRef, where('reservedBy', '==', ticketId));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return [];
+    const seats: Seat[] = [];
+    const checkedInCache = doc(db, "caches", "seats.checkedIn");
+    const checkedInSnap = await getDoc(checkedInCache);
+    const checkedInData = checkedInSnap.data() || {};
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const checkedIn = checkedInData[docSnap.id] || false;
+        seats.push({
+            id: docSnap.id,
+            label: data.label,
+            level: data.level,
+            isAvailable: data.isAvailable,
+            reservedBy: data.reservedBy ?? null,
+            category: data.category,
+            location: data.location,
+            notSelectable: data.notSelectable ?? false,
+            leftId: data.leftId ?? null,
+            rightId: data.rightId ?? null,
+            lastUpdated: data.lastUpdated ?? null,
+            checkedIn: checkedIn
+        });
+    });
     return seats;
 }

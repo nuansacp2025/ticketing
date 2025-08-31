@@ -26,12 +26,16 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
 
 export async function clearLocalStorage(): Promise<void> {
     localStorage.clear();
-    
+
     if ('caches' in window) {
+      try {
         const keys = await caches.keys();
         await Promise.all(keys.map(key => caches.delete(key)));
+      } catch (err) {
+        console.error('Error clearing caches', err);
+      }
     }
-
+    
     window.location.reload();
 };
 

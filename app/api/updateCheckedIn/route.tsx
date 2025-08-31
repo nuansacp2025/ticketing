@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
         const decoded = await verifyAdmin(token);
 
         const body = await request.json();
-        const seats = await updateCheckedInStatus(body.ticketCode);
+        const seats = await updateCheckedInStatus(body.ticketCode, body.seatIds);
         return NextResponse.json({ status: 200, error: "", seats: seats });
     } catch (error: any) {
         if(error instanceof ApiError) return NextResponse.json({ error: error.message }, { status: error.status });

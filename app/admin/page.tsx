@@ -87,7 +87,19 @@ export default function AdminPage() {
         })
         .catch(console.error),
     ]).then(() => {
-      setLastUpdated(new Date(Math.max(lastUpdatedCustomers, lastUpdatedTickets, lastUpdatedSeats)).toISOString());
+      // only keep the finite timestamps
+      const allTimes = [
+        lastUpdatedCustomers,
+        lastUpdatedTickets,
+        lastUpdatedSeats
+      ].filter(ts => Number.isFinite(ts));
+
+      // fall back to now if none are valid
+      const maxTime = allTimes.length
+        ? Math.max(...allTimes)
+        : Date.now();
+
+      setLastUpdated(new Date(maxTime).toISOString());
       setError(null);
     }).catch(err => {
       console.error('Error fetching data:', err);
