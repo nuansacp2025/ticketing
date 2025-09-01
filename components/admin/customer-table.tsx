@@ -10,6 +10,7 @@ import {
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
 import { Customer } from '@/lib/db';
+import { useGridCopy } from '@/components/admin/use-grid-copy';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -19,6 +20,7 @@ export const CustomerTable: React.FC<{ customers: Record<string, Customer> }> = 
     gridApi.current = e.api;
     e.api.sizeColumnsToFit();
   }
+  const handleKeyDown = useGridCopy(gridApi);
 
   const defaultColDef: GridOptions['defaultColDef'] = {
     flex: 1,
@@ -47,7 +49,7 @@ export const CustomerTable: React.FC<{ customers: Record<string, Customer> }> = 
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="w-full select-text" tabIndex={0} onKeyDown={handleKeyDown}>
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
@@ -57,6 +59,7 @@ export const CustomerTable: React.FC<{ customers: Record<string, Customer> }> = 
         onGridReady={gridOnReady}
         pagination={true}
         animateRows={true}
+        enableCellTextSelection
       />
       <button
         onClick={exportCsv}
