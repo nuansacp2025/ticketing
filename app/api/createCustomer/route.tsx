@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyAdmin } from '@/lib/auth';
 import { ApiError, UnauthorizedError } from '@/lib/error';
 import { db } from '@/db/source';
-import { collection, doc, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 function generateCode(length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -28,10 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     const now = Timestamp.now();
-    const ticketRef = doc(collection(db, 'tickets'));
-    const ticketId = ticketRef.id;
     const code = generateCode();
-    await setDoc(ticketRef, {
+    const ticketRef = await addDoc(collection(db, 'tickets'), {
       code,
       catA: Number(catA) || 0,
       catB: Number(catB) || 0,
@@ -40,9 +38,9 @@ export async function POST(request: NextRequest) {
       checkedIn: false,
       lastUpdated: now,
     });
+    const ticketId = ticketRef.id;
 
-    const customerRef = doc(collection(db, 'customers'));
-    await setDoc(customerRef, {
+    await addDoc(collection(db, 'customers'), {
       email,
       ticketIds: [ticketId],
       lastUpdated: now,
