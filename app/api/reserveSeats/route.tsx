@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
 
     await setSeatsReserved(body.ids, ticketId);
 
+    /** Disable this temporarily for production
+
     const emailResponse = await fetch(`${PYTHON_API_URL}/api/email/sendSeatConfirmation`, {
       method: "POST",
       headers: {
@@ -29,9 +31,11 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({ ticketId }),
     });
+    */
 
     const ticketRef = doc(db, "tickets", ticketId);
-    updateDoc(ticketRef, { "seatConfirmationSent": emailResponse.ok });
+    // updateDoc(ticketRef, { "seatConfirmationSent": emailResponse.ok });
+    updateDoc(ticketRef, { "seatConfirmationSent": false }); 
     // TODO: Send error log to DB if response is not OK
 
     return NextResponse.json({ success: true }, { status: 200 });
