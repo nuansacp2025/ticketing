@@ -15,6 +15,7 @@ import { CustomerTable } from '@/components/admin/customer-table';
 import { JoinedTicketTable } from '@/components/admin/joined-ticket-table';
 import { JoinedSeatTable } from '@/components/admin/joined-seat-table';
 import { TicketCheckIn } from '@/components/admin/ticket-checkin';
+import { CustomerCreate } from '@/components/admin/customer-create';
 import { Customer, Seat, Ticket } from '@/lib/db';
 import { clearLocalStorage, updateData, useLocalStorage } from '@/app/local-storage';
 
@@ -23,8 +24,8 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-type Tab = 'CheckIn' | 'Customers' | 'Tickets' | 'Seats' | 'Statistics';
-const tabs: Tab[] = ['CheckIn', 'Customers', 'Tickets', 'Seats', 'Statistics'];
+type Tab = 'CheckIn' | 'Customers' | 'Tickets' | 'Seats' | 'Statistics' | 'CreateCustomer';
+const tabs: Tab[] = ['CheckIn', 'Customers', 'Tickets', 'Seats', 'Statistics', 'CreateCustomer'];
 
 export default function AdminPage() {
   // Authentication state
@@ -202,7 +203,7 @@ export default function AdminPage() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'CheckIn' ? 'Ticket Check-In' : tab}
+            {tab === 'CheckIn' ? 'Ticket Check-In' : tab === 'CreateCustomer' ? 'Create Customer' : tab}
           </button>
         ))}
       </nav>
@@ -212,6 +213,7 @@ export default function AdminPage() {
         {activeTab === 'Tickets' && <JoinedTicketTable tickets={tickets} customers={customers} />}
         {activeTab === 'Seats' && <JoinedSeatTable tickets={tickets} customers={customers} seats={seats} />}
         {activeTab === 'Statistics' && <Stats customers={customers} tickets={tickets} seats={seats} />}
+        {activeTab === 'CreateCustomer' && <CustomerCreate />}
       </main>
 
       <button
