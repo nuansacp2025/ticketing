@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import {
   ModuleRegistry,
@@ -6,14 +6,21 @@ import {
   GridOptions,
   ColDef,
   GridReadyEvent,
+  GridApi,
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
 import { Ticket } from '@/lib/db';
+import { useGridCopy } from '@/components/admin/use-grid-copy';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export const TicketTable: React.FC<{ tickets: Record<string, Ticket> }> = ({ tickets }) => {
-  const gridOnReady = (e: GridReadyEvent) => e.api.sizeColumnsToFit();
+  const gridApi = useRef<GridApi | null>(null);
+  const gridOnReady = (e: GridReadyEvent) => {
+    gridApi.current = e.api;
+    e.api.sizeColumnsToFit();
+  };
+  const handleKeyDown = useGridCopy(gridApi);
 
   const defaultColDef: GridOptions['defaultColDef'] = {
     flex: 1,
@@ -35,7 +42,7 @@ export const TicketTable: React.FC<{ tickets: Record<string, Ticket> }> = ({ tic
   ];
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="w-full select-text" tabIndex={0} onKeyDown={handleKeyDown}>
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
@@ -45,6 +52,7 @@ export const TicketTable: React.FC<{ tickets: Record<string, Ticket> }> = ({ tic
         onGridReady={gridOnReady}
         pagination={true}
         animateRows={true}
+        enableCellTextSelection
       />
     </div>
   );

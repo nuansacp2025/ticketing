@@ -9,6 +9,7 @@ import {
 } from 'ag-grid-community';
 import { darkGreenTheme } from '@/app/ag-grid-theme';
 import { Customer, Seat, Ticket } from '@/lib/db';
+import { useGridCopy } from '@/components/admin/use-grid-copy';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -22,6 +23,7 @@ export const JoinedSeatTable: React.FC<{
       gridApi.current = e.api;
       e.api.sizeColumnsToFit();
     }
+    const handleKeyDown = useGridCopy(gridApi);
 
     const rowData = useMemo(() =>
         Object.values(seats).map(s => {
@@ -72,7 +74,7 @@ export const JoinedSeatTable: React.FC<{
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="w-full select-text" tabIndex={0} onKeyDown={handleKeyDown}>
       <AgGridReact
         theme={darkGreenTheme}
         domLayout="autoHeight"
@@ -82,6 +84,7 @@ export const JoinedSeatTable: React.FC<{
         pagination={true}
         animateRows={true}
         onGridReady={gridOnReady}
+        enableCellTextSelection
       />
       <button
         onClick={exportCsv}
