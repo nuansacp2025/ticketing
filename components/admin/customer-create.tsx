@@ -40,37 +40,50 @@ export const CustomerCreate: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: 360 }}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        style={inputStyle}
-      />
-      <input
-        type="number"
-        min="0"
-        placeholder="CatA Tickets"
-        value={catA}
-        onChange={e => setCatA(parseInt(e.target.value) || 0)}
-        style={inputStyle}
-      />
-      <input
-        type="number"
-        min="0"
-        placeholder="CatB Tickets"
-        value={catB}
-        onChange={e => setCatB(parseInt(e.target.value) || 0)}
-        style={inputStyle}
-      />
-      <input
-        type="number"
-        min="0"
-        placeholder="CatC Tickets"
-        value={catC}
-        onChange={e => setCatC(parseInt(e.target.value) || 0)}
-        style={inputStyle}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          style={inputStyle}
+        />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="catA">Cat&nbsp;A Tickets</label>
+        <input
+          id="catA"
+          type="number"
+          min="0"
+          value={catA}
+          onChange={e => setCatA(parseInt(e.target.value) || 0)}
+          style={inputStyle}
+        />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="catB">Cat&nbsp;B Tickets</label>
+        <input
+          id="catB"
+          type="number"
+          min="0"
+          value={catB}
+          onChange={e => setCatB(parseInt(e.target.value) || 0)}
+          style={inputStyle}
+        />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="catC">Cat&nbsp;C Tickets</label>
+        <input
+          id="catC"
+          type="number"
+          min="0"
+          value={catC}
+          onChange={e => setCatC(parseInt(e.target.value) || 0)}
+          style={inputStyle}
+        />
+      </div>
       {status && <div>{status}</div>}
       <button
         type="submit"
