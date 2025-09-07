@@ -5,7 +5,7 @@ import { ApiError, UnauthorizedError } from '@/lib/error';
 import { db } from '@/db/source';
 import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 
-async function generateUniqueCode(prefix = 'D_DAY', length = 8) {
+async function generateUniqueCode(prefix, length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   for (let attempt = 0; attempt < 5; attempt++) {
     let random = '';
@@ -31,13 +31,16 @@ export async function POST(request: NextRequest) {
     }
     await verifyAdmin(token);
 
-    const { email, catA = 0, catB = 0, catC = 0 } = await request.json();
+    const { email, prefix, catA = 0, catB = 0, catC = 0 } = await request.json();
     if (!email) {
       return NextResponse.json({ error: 'Field `email` required' }, { status: 400 });
     }
+    if (!prefix) {
+      return NextResponse.json({ error: 'Field `prefix` required' }, { status: 400 });
+    }
 
     const now = Timestamp.now();
-    const code = await generateUniqueCode();
+    const code = await generateUniqueCode(prefix);
     const ticketRef = await addDoc(collection(db, 'tickets'), {
       code,
       catA: Number(catA) || 0,
