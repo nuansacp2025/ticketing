@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 export const CustomerCreate: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [prefix, setPrefix] = useState('');
   const [catA, setCatA] = useState(0);
   const [catB, setCatB] = useState(0);
   const [catC, setCatC] = useState(0);
@@ -15,7 +16,7 @@ export const CustomerCreate: React.FC = () => {
       const res = await fetch('/api/createCustomer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, catA, catB, catC }),
+        body: JSON.stringify({ email, prefix, catA, catB, catC }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -48,6 +49,17 @@ export const CustomerCreate: React.FC = () => {
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          style={inputStyle}
+        />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="prefix">Ticket Prefix</label>
+        <input
+          id="prefix"
+          type="text"
+          placeholder=""
+          value={prefix}
+          onChange={e => setPrefix(e.target.value)}
           style={inputStyle}
         />
       </div>
