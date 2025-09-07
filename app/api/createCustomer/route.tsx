@@ -5,7 +5,7 @@ import { ApiError, UnauthorizedError } from '@/lib/error';
 import { db } from '@/db/source';
 import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 
-async function generateUniqueCode(prefix, length = 8) {
+async function generateUniqueCode(prefix: string, length: number = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   for (let attempt = 0; attempt < 5; attempt++) {
     let random = '';
