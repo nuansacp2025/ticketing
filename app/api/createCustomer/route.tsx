@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
       catA: Number(catA) || 0,
       catB: Number(catB) || 0,
       catC: Number(catC) || 0,
+      customerEmail: email,
       seatConfirmed: false,
       checkedIn: false,
+      createdAt: now,
+      purchaseConfirmationSent: false,
       lastUpdated: now,
     });
     const ticketId = ticketRef.id;
