@@ -149,9 +149,11 @@ export async function getCustomersQuery(filters: {
 
 export async function getCustomerByEmail(email: string) : Promise<Customer | null> {
     const customersRef = collection(db, 'customers');
-    const q = query(customersRef, where('email', '==', email));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
+    const normalizedEmail = email.trim().toLowerCase();
+    let snapshot = await getDocs(query(customersRef, where('email', '==', normalizedEmail)));
+    if (snapshot.empty && normalizedEmail !== email) {
+        snapshot = await getDocs(query(customersRef, where('email', '==', email)));
+    }
     const doc = snapshot.docs[0];
     const customer: Customer = {
         id: doc.id,
