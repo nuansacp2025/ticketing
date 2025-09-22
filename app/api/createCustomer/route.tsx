@@ -38,6 +38,9 @@ export async function POST(request: NextRequest) {
     if (!prefix) {
       return NextResponse.json({ error: 'Field `prefix` required' }, { status: 400 });
     }
+    if (typeof email !== 'string') {
+      return NextResponse.json({ error: 'Field `email` must be a string' }, { status: 400 });
+    }
 
     const now = Timestamp.now();
     const code = await generateUniqueCode(prefix);
